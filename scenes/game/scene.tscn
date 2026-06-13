@@ -1,7 +1,8 @@
-[gd_scene format=3 uid="uid://b8uhk6wgsyvr"]
+[gd_scene load_steps=4 format=3 uid="uid://b8uhk6wgsyvr"]
 
 [ext_resource type="Script" uid="uid://dis1x4i75bhd7" path="res://scenes/game/script.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
+[ext_resource type="PackedScene" path="res://scenes/prey_deck/scene.tscn" id="3_prey_deck"]
 
 [node name="Game" type="Node2D" unique_id=549444923]
 script = ExtResource("1_game")
@@ -16,6 +17,16 @@ offset_bottom = 267.0
 grow_horizontal = 2
 
 [node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
+layout_mode = 2
+
+[node name="PreyDeckContainer" type="CenterContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 318.0
+offset_bottom = 521.0
+grow_horizontal = 2
+
+[node name="PreyDeck" parent="UI/PreyDeckContainer" instance=ExtResource("3_prey_deck")]
 layout_mode = 2
 
 [node name="PauseMenu" type="Control" parent="UI" unique_id=1066678876]
