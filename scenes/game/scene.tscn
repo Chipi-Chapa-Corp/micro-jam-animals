@@ -1,45 +1,33 @@
 [gd_scene format=3 uid="uid://b8uhk6wgsyvr"]
 
 [ext_resource type="Script" uid="uid://dis1x4i75bhd7" path="res://scenes/game/script.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
 
-[node name="Game" type="Control" unique_id=549444923]
+[node name="Game" type="Node2D" unique_id=549444923]
+script = ExtResource("1_game")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=390258418]
+
+[node name="PredatorDeckContainer" type="CenterContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 64.0
+offset_bottom = 267.0
+grow_horizontal = 2
+
+[node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
+layout_mode = 2
+
+[node name="PauseMenu" type="Control" parent="UI" unique_id=1066678876]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_game")
 
-[node name="TopBar" type="HBoxContainer" parent="." unique_id=1069004905]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 24.0
-offset_top = 20.0
-offset_right = -24.0
-offset_bottom = 56.0
-grow_horizontal = 2
-theme_override_constants/separation = 12
-
-[node name="Title" type="Label" parent="TopBar" unique_id=1922144675]
-layout_mode = 2
-text = "Game"
-
-[node name="Spacer" type="Control" parent="TopBar" unique_id=2120240087]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PauseMenu" type="Control" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Background" type="ColorRect" parent="PauseMenu"]
+[node name="Background" type="ColorRect" parent="UI/PauseMenu" unique_id=805906420]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -48,7 +36,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.07, 0.06, 0.86)
 
-[node name="CenterContainer" type="CenterContainer" parent="PauseMenu"]
+[node name="CenterContainer" type="CenterContainer" parent="UI/PauseMenu" unique_id=968806736]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -56,27 +44,27 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Menu" type="VBoxContainer" parent="PauseMenu/CenterContainer"]
+[node name="Menu" type="VBoxContainer" parent="UI/PauseMenu/CenterContainer" unique_id=81724635]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="PauseMenu/CenterContainer/Menu"]
+[node name="Title" type="Label" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=832407417]
 layout_mode = 2
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="Resume" type="Button" parent="PauseMenu/CenterContainer/Menu"]
+[node name="Resume" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=2077523352]
 layout_mode = 2
 text = "Resume"
 
-[node name="MainMenu" type="Button" parent="PauseMenu/CenterContainer/Menu"]
+[node name="MainMenu" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=1977902567]
 layout_mode = 2
 text = "Main Menu"
 
-[node name="Quit" type="Button" parent="PauseMenu/CenterContainer/Menu"]
+[node name="Quit" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=1480331665]
 layout_mode = 2
 text = "Quit"
 
-[connection signal="pressed" from="PauseMenu/CenterContainer/Menu/Resume" to="." method="_on_resume_pressed"]
-[connection signal="pressed" from="PauseMenu/CenterContainer/Menu/MainMenu" to="." method="_on_main_menu_pressed"]
-[connection signal="pressed" from="PauseMenu/CenterContainer/Menu/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/MainMenu" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Quit" to="." method="_on_quit_pressed"]

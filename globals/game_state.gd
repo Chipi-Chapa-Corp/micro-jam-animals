@@ -7,6 +7,7 @@ signal player_discards_count_changed(player_discards_count: int)
 
 const DEFAULT_SCORE: int = 0
 const DEFAULT_HEALTH: int = 100
+const DEFAULT_ROUND: int = 0
 const DEFAULT_PREDATOR_COUNT: int = 3
 const DEFAULT_PLAYER_HAND_COUNT: int = 10
 const DEFAULT_PLAYER_DISCARDS_COUNT: int = 3
@@ -14,6 +15,7 @@ const MAX_PLAYER_DISCARD_CARDS: int = 3
 
 var _score: int = DEFAULT_SCORE
 var _health: int = DEFAULT_HEALTH
+var _round: int = DEFAULT_ROUND
 var _predators: Array = []
 var _player_hand: Array = []
 var _player_table: Array = []
@@ -23,10 +25,23 @@ var _player_discards_count: int = DEFAULT_PLAYER_DISCARDS_COUNT
 func reset() -> void:
 	set_score(DEFAULT_SCORE)
 	set_health(DEFAULT_HEALTH)
+	_set_round(DEFAULT_ROUND)
 	generate_predators(0)
 	set_player_hand([])
 	set_player_table([])
 	_set_player_discards_count(DEFAULT_PLAYER_DISCARDS_COUNT)
+
+
+func start_new_round() -> void:
+	_set_round(_round + 1)
+	generate_predators()
+	fill_player_hand()
+	set_player_table([])
+	_set_player_discards_count(DEFAULT_PLAYER_DISCARDS_COUNT)
+
+
+func go_next_round() -> void:
+	start_new_round()
 
 
 func get_score() -> int:
@@ -61,6 +76,10 @@ func change_health(amount: int) -> void:
 	set_health(_health + amount)
 
 
+func get_round() -> int:
+	return _round
+
+
 func get_predators() -> Array:
 	return _predators.duplicate()
 
@@ -81,6 +100,19 @@ func set_player_hand(value: Array) -> void:
 
 func generate_player_hand(count: int = DEFAULT_PLAYER_HAND_COUNT, excluded: Array = []) -> Array:
 	set_player_hand(Cards.pick_random_prey(count, excluded))
+	return get_player_hand()
+
+
+func fill_player_hand(count: int = DEFAULT_PLAYER_HAND_COUNT) -> Array:
+	var missing_count := count - _player_hand.size()
+	if missing_count <= 0:
+		return get_player_hand()
+
+	var excluded_cards := []
+	excluded_cards.append_array(_player_hand)
+	excluded_cards.append_array(_player_table)
+
+	_player_hand.append_array(Cards.pick_random_prey(missing_count, excluded_cards))
 	return get_player_hand()
 
 
@@ -144,6 +176,10 @@ func discard_cards(card_ids: Array) -> Array:
 
 func get_player_discards_count() -> int:
 	return _player_discards_count
+
+
+func _set_round(value: int) -> void:
+	_round = value
 
 
 func _set_player_discards_count(value: int) -> void:
