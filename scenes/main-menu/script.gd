@@ -8,6 +8,10 @@ func _on_start_pressed() -> void:
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 
+func _on_restart_pressed() -> void:
+	get_tree().change_scene_to_file(GAME_SCENE)
+
+
 func _on_credits_pressed() -> void:
 	get_tree().change_scene_to_file(CREDITS_SCENE)
 
