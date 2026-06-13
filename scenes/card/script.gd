@@ -26,6 +26,9 @@ const KIND_PREDATOR: String = "predator"
 const WATER_COLOR: Color = Color(111.0 / 255.0, 111.0 / 255.0, 175.0 / 255.0)
 const LAND_COLOR: Color = Color(126.0 / 255.0, 160.0 / 255.0, 118.0 / 255.0)
 const AIR_COLOR: Color = Color(171.0 / 255.0, 177.0 / 255.0, 188.0 / 255.0)
+const CARD_ART_CENTER: Vector2 = Vector2(55.0, 77.0)
+const CARD_ART_SIZE: Vector2 = Vector2(75.0, 80.0)
+const CARD_ART_SCALE: float = 1.5
 
 var id: String:
 	get:
@@ -154,18 +157,9 @@ func _refresh_suit_color() -> void:
 
 
 func _refresh_art_layout() -> void:
-	if value == 1:
-		_set_control_anchors(art, Vector2(0.16, 0.24), Vector2(0.84, 0.76))
-		art.rotation = 0.0
-		bottom_art.visible = false
-		_sync_pivots()
-		return
-
-	_set_control_anchors(art, Vector2(0.18, 0.24), Vector2(0.82, 0.46))
+	_set_control_rect(art, CARD_ART_CENTER, CARD_ART_SIZE, CARD_ART_SCALE)
 	art.rotation = 0.0
-	bottom_art.visible = true
-	_set_control_anchors(bottom_art, Vector2(0.18, 0.54), Vector2(0.82, 0.76))
-	bottom_art.rotation = PI
+	bottom_art.visible = false
 	_sync_pivots()
 
 
@@ -196,15 +190,18 @@ func _get_suit_color() -> Color:
 			return AIR_COLOR
 
 
-func _set_control_anchors(control: Control, top_left: Vector2, bottom_right: Vector2) -> void:
-	control.anchor_left = top_left.x
-	control.anchor_top = top_left.y
-	control.anchor_right = bottom_right.x
-	control.anchor_bottom = bottom_right.y
-	control.offset_left = 0.0
-	control.offset_top = 0.0
-	control.offset_right = 0.0
-	control.offset_bottom = 0.0
+func _set_control_rect(control: Control, center: Vector2, base_size: Vector2, scale_value: float) -> void:
+	var next_size := base_size * scale_value
+	var top_left := center - (next_size * 0.5)
+
+	control.anchor_left = 0.0
+	control.anchor_top = 0.0
+	control.anchor_right = 0.0
+	control.anchor_bottom = 0.0
+	control.offset_left = top_left.x
+	control.offset_top = top_left.y
+	control.offset_right = top_left.x + next_size.x
+	control.offset_bottom = top_left.y + next_size.y
 
 
 func _on_mouse_entered() -> void:
