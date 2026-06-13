@@ -39,6 +39,15 @@ grow_horizontal = 2
 
 [node name="PlayerHandDeck" parent="UI/PlayerHandDeckContainer" unique_id=1911056388 instance=ExtResource("4_player_hand_deck")]
 
+[node name="CardAnimationLayer" type="Control" parent="UI" unique_id=430342872]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="PauseMenu" type="Control" parent="UI" unique_id=1066678876]
 visible = false
 layout_mode = 3

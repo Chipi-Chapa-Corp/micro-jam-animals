@@ -1,6 +1,8 @@
 extends Control
 class_name PlayerHandDeck
 
+signal card_move_animation_requested(card: Dictionary, from_global_position: Vector2, from_rotation_degrees: float)
+
 const CARD_SCENE: PackedScene = preload("res://scenes/card/scene.tscn")
 const CARD_KIND: String = "prey"
 const CARD_SIZE: Vector2 = Vector2(110.0, 154.0)
@@ -32,6 +34,15 @@ func render_cards() -> void:
 			_add_card(player_card, index)
 
 	_layout_cards()
+
+
+func get_card_by_id(card_id: String) -> CardScene:
+	for child in get_children():
+		var card := child as CardScene
+		if card and card.id == card_id:
+			return card
+
+	return null
 
 
 func _add_card(player_card: Dictionary, hand_index: int) -> void:
@@ -95,9 +106,17 @@ func _clear_cards() -> void:
 
 
 func _on_card_clicked(card_id: String) -> void:
+	var source_card := get_card_by_id(card_id)
+	if not source_card:
+		return
+
+	var from_global_position := source_card.global_position
+	var from_rotation_degrees := source_card.rotation_degrees
 	var result := GameState.move_card_from_player_hand_to_table(card_id)
 	if result.has("error"):
 		return
+
+	card_move_animation_requested.emit(result, from_global_position, from_rotation_degrees)
 
 
 func _on_player_hand_changed(_player_hand: Array) -> void:

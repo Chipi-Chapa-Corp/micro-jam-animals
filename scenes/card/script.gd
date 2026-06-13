@@ -98,8 +98,7 @@ func _refresh_art() -> void:
 
 
 func _get_asset_path() -> String:
-	# return "res://assets/%s.png" % get_card_id()
-	return "res://assets/prey_%s_%s.png" % [suit, value]
+	return "res://assets/%s.png" % get_card_id()
 
 
 func _on_mouse_entered() -> void:
