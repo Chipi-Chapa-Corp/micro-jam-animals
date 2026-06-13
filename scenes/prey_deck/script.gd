@@ -26,6 +26,7 @@ func _add_card(prey_card: Dictionary) -> void:
 	print("PreyDeck instantiating card: ", prey_card)
 	var card := CARD_SCENE.instantiate() as CardScene
 	card.configure(CARD_KIND, str(prey_card.get("suit", "")), int(prey_card.get("value", 0)))
+	card.clicked.connect(_on_card_clicked)
 	add_child(card)
 
 
@@ -44,6 +45,10 @@ func _shake_cards() -> void:
 
 func _on_player_table_changed(_player_table: Array) -> void:
 	render_cards()
+
+
+func _on_card_clicked(card_id: String) -> void:
+	GameState.move_card_from_player_table_to_hand(card_id)
 
 
 func _on_player_table_move_failed(error: String) -> void:
