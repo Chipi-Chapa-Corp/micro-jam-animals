@@ -1,6 +1,8 @@
 extends Control
 class_name CardScene
 
+signal clicked(card_id: String)
+
 @export var kind: String = "prey"
 @export var suit: String = "air"
 @export var value: int = 4
@@ -15,6 +17,8 @@ const PICKUP_TILT_DEGREES: float = 3.0
 const PICKUP_DURATION: float = 0.08
 const ALIGN_DURATION: float = 0.11
 const LOWER_DURATION: float = 0.12
+const SHAKE_OFFSET: Vector2 = Vector2(7.0, 0.0)
+const SHAKE_DURATION: float = 0.035
 
 var id: String:
 	get:
@@ -26,6 +30,7 @@ var id: String:
 var _base_shadow_position: Vector2 = Vector2.ZERO
 var _base_art_position: Vector2 = Vector2.ZERO
 var _hover_tween: Tween
+var _shake_tween: Tween
 
 
 func _ready() -> void:
@@ -42,6 +47,12 @@ func _notification(what: int) -> void:
 		_sync_pivots()
 
 
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		clicked.emit(id)
+		accept_event()
+
+
 func configure(next_kind: String, next_suit: String, next_value: int) -> void:
 	kind = next_kind
 	suit = next_suit
@@ -51,6 +62,30 @@ func configure(next_kind: String, next_suit: String, next_value: int) -> void:
 
 func get_card_id() -> String:
 	return "%s_%s_%s" % [kind, suit, value]
+
+
+func shake_feedback() -> void:
+	if _shake_tween:
+		_shake_tween.kill()
+
+	var art_start_position := _base_art_position
+	var shadow_start_position := _base_shadow_position
+	art.position = art_start_position
+	shadow.position = shadow_start_position
+
+	_shake_tween = create_tween()
+	_shake_tween.set_trans(Tween.TRANS_SINE)
+	_shake_tween.set_ease(Tween.EASE_IN_OUT)
+	_shake_tween.tween_property(art, "position", art_start_position - SHAKE_OFFSET, SHAKE_DURATION)
+	_shake_tween.parallel().tween_property(
+		shadow, "position", shadow_start_position - SHAKE_OFFSET, SHAKE_DURATION
+	)
+	_shake_tween.tween_property(art, "position", art_start_position + SHAKE_OFFSET, SHAKE_DURATION)
+	_shake_tween.parallel().tween_property(
+		shadow, "position", shadow_start_position + SHAKE_OFFSET, SHAKE_DURATION
+	)
+	_shake_tween.tween_property(art, "position", art_start_position, SHAKE_DURATION)
+	_shake_tween.parallel().tween_property(shadow, "position", shadow_start_position, SHAKE_DURATION)
 
 
 func _refresh_art() -> void:

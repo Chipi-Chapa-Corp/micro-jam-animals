@@ -2,6 +2,9 @@ extends Node
 
 signal score_changed(score: int)
 signal health_changed(health: int)
+signal player_hand_changed(player_hand: Array)
+signal player_table_changed(player_table: Array)
+signal player_table_move_failed(error: String)
 signal player_cards_discarded(discarded_cards: Array, new_cards: Array, player_discards_count: int)
 signal player_discards_count_changed(player_discards_count: int)
 
@@ -11,7 +14,9 @@ const DEFAULT_ROUND: int = 0
 const DEFAULT_PREDATOR_COUNT: int = 3
 const DEFAULT_PLAYER_HAND_COUNT: int = 10
 const DEFAULT_PLAYER_DISCARDS_COUNT: int = 3
+const MAX_PLAYER_TABLE_CARDS: int = 5
 const MAX_PLAYER_DISCARD_CARDS: int = 3
+const ERROR_PLAYER_TABLE_FULL: String = "player_table_full"
 
 var _score: int = DEFAULT_SCORE
 var _health: int = DEFAULT_HEALTH
@@ -96,6 +101,7 @@ func get_player_hand() -> Array:
 
 func set_player_hand(value: Array) -> void:
 	_player_hand = value.duplicate()
+	player_hand_changed.emit(get_player_hand())
 
 
 func generate_player_hand(count: int = DEFAULT_PLAYER_HAND_COUNT, excluded: Array = []) -> Array:
@@ -122,12 +128,17 @@ func get_player_table() -> Array:
 
 func set_player_table(value: Array) -> void:
 	_player_table = value.duplicate()
+	player_table_changed.emit(get_player_table())
 
 
 func move_card_from_player_hand_to_table(card_id: String) -> Dictionary:
 	var index := _find_card_index_by_id(_player_hand, card_id)
 	if index == -1:
 		return {}
+
+	if _player_table.size() >= MAX_PLAYER_TABLE_CARDS:
+		player_table_move_failed.emit(ERROR_PLAYER_TABLE_FULL)
+		return {"error": ERROR_PLAYER_TABLE_FULL}
 
 	var next_player_hand := get_player_hand()
 	var next_player_table := get_player_table()

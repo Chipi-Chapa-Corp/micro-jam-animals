@@ -4,11 +4,11 @@
 [ext_resource type="Texture2D" path="res://assets/prey_air_4.png" id="2_card_art"]
 
 [node name="Card" type="Control"]
-custom_minimum_size = Vector2(120, 168)
+custom_minimum_size = Vector2(110, 154)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 120.0
-offset_bottom = 168.0
+offset_right = 110.0
+offset_bottom = 154.0
 script = ExtResource("1_card")
 
 [node name="Shadow" type="TextureRect" parent="."]
