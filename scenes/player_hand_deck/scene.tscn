@@ -3,6 +3,6 @@
 [ext_resource type="Script" path="res://scenes/player_hand_deck/script.gd" id="1_player_hand_deck"]
 
 [node name="PlayerHandDeck" type="Control"]
-custom_minimum_size = Vector2(1040, 250)
+custom_minimum_size = Vector2(860, 220)
 layout_mode = 2
 script = ExtResource("1_player_hand_deck")

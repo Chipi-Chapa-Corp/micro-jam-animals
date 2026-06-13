@@ -3,8 +3,8 @@ class_name PlayerHandDeck
 
 const CARD_SCENE: PackedScene = preload("res://scenes/card/scene.tscn")
 const CARD_KIND: String = "prey"
-const CARD_SIZE: Vector2 = Vector2(145.0, 203.0)
-const CARD_STEP: float = 94.0
+const CARD_SIZE: Vector2 = Vector2(120.0, 168.0)
+const CARD_STEP: float = 78.0
 const MAX_FAN_ROTATION_DEGREES: float = 5.0
 const MAX_FAN_DROP: float = 18.0
 const TOP_PADDING: float = 20.0
@@ -62,7 +62,7 @@ func _layout_cards() -> void:
 		card.position = Vector2(start_x + (CARD_STEP * float(index)), TOP_PADDING + fan_drop)
 		card.pivot_offset = CARD_SIZE * 0.5
 		card.rotation_degrees = normalized_offset * MAX_FAN_ROTATION_DEGREES
-		card.z_index = index
+		card.z_index = card_count - index
 
 
 func _clear_cards() -> void:
