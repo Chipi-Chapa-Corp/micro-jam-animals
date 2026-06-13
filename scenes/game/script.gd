@@ -3,7 +3,9 @@ extends Node2D
 const MAIN_MENU_SCENE: String = "res://scenes/main-menu/scene.tscn"
 const CARD_SCENE: PackedScene = preload("res://scenes/card/scene.tscn")
 const CARD_KIND: String = "prey"
-const CARD_MOVE_DURATION: float = 0.22
+const CARD_MOVE_DURATION: float = 0.2
+const CARD_MOVE_SCALE: Vector2 = Vector2(1.08, 1.08)
+const CARD_MOVE_SCALE_DURATION: float = 0.08
 const CARD_MOVE_LAYOUT_FRAMES: int = 3
 
 @onready var pause_menu: Control = $UI/PauseMenu
@@ -66,8 +68,8 @@ func _animate_card_move(
 	var moving_card := CARD_SCENE.instantiate() as CardScene
 	moving_card.configure(CARD_KIND, str(card.get("suit", "")), int(card.get("value", 0)))
 	moving_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	moving_card.z_index = 1000
-	card_animation_layer.add_child(moving_card)
+	_add_moving_card(moving_card, target_deck, target_card)
+	moving_card.pivot_offset = moving_card.size * 0.5
 	moving_card.global_position = from_global_position
 	moving_card.rotation_degrees = from_rotation_degrees
 
@@ -87,6 +89,14 @@ func _animate_card_move(
 		to_global_position = target_card.global_position
 		to_rotation_degrees = target_card.rotation_degrees
 
+	var scale_tween := create_tween()
+	scale_tween.set_trans(Tween.TRANS_SINE)
+	scale_tween.set_ease(Tween.EASE_OUT)
+	scale_tween.tween_property(moving_card, "scale", CARD_MOVE_SCALE, CARD_MOVE_SCALE_DURATION)
+	scale_tween.tween_property(
+		moving_card, "scale", Vector2.ONE, CARD_MOVE_DURATION - CARD_MOVE_SCALE_DURATION
+	)
+
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_OUT)
@@ -105,3 +115,13 @@ func _get_target_card(target_deck: Node, card_id: String) -> CardScene:
 		return target_deck.get_card_by_id(card_id) as CardScene
 
 	return null
+
+
+func _add_moving_card(moving_card: CardScene, target_deck: Node, target_card: CardScene) -> void:
+	if target_deck == player_hand_deck and is_instance_valid(target_card):
+		player_hand_deck.add_child(moving_card)
+		moving_card.z_index = target_card.z_index
+		return
+
+	moving_card.z_index = 1000
+	card_animation_layer.add_child(moving_card)
