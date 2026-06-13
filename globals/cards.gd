@@ -3,6 +3,32 @@ extends Node
 const SUIT_WATER: String = "water"
 const SUIT_LAND: String = "land"
 const SUIT_AIR: String = "air"
+const PREDATOR_HAND_HIGH_CARD: String = "high_card"
+const PREDATOR_HAND_PAIR: String = "pair"
+const PREDATOR_HAND_THREE_OF_A_KIND: String = "three_of_a_kind"
+const PREDATOR_HAND_TWO_PAIR: String = "two_pair"
+const PREDATOR_HAND_STRAIGHT: String = "straight"
+const PREDATOR_HAND_FULL_HOUSE: String = "full_house"
+const PREDATOR_HAND_PATTERNS: Array[String] = [
+	PREDATOR_HAND_HIGH_CARD,
+	PREDATOR_HAND_PAIR,
+	PREDATOR_HAND_THREE_OF_A_KIND,
+	PREDATOR_HAND_TWO_PAIR,
+	PREDATOR_HAND_STRAIGHT,
+	PREDATOR_HAND_FULL_HOUSE,
+]
+const PREDATOR_STRAIGHT_VALUES: Array = [
+	[1, 2, 3, 4, 5],
+	[2, 3, 4, 5, 6],
+	[3, 4, 5, 6, 7],
+	[4, 5, 6, 7, 8],
+	[5, 6, 7, 8, 9],
+	[6, 7, 8, 9, 10],
+	[7, 8, 9, 10, 11],
+	[8, 9, 10, 11, 12],
+	[9, 10, 11, 12, 13],
+	[10, 11, 12, 13, 1],
+]
 
 const PREY_IDS: Array[String] = [
 	"prey_water_1",
@@ -187,6 +213,20 @@ func pick_random_prey(count: int, excluded: Array = []) -> Array:
 	return _pick_random_cards(PREY_IDS, count, excluded)
 
 
+func pick_random_predator_hand(excluded: Array = []) -> Array:
+	var excluded_ids := _get_excluded_ids(excluded)
+
+	for _attempt in range(30):
+		var pattern := _pick_random_predator_hand_pattern()
+		var values := _get_random_predator_hand_values(pattern)
+		var picked_cards := _pick_random_predators_with_values(values, excluded_ids)
+
+		if not picked_cards.is_empty():
+			return picked_cards
+
+	return pick_random_predators(1, excluded)
+
+
 func pick_random_predators(count: int, excluded: Array = []) -> Array:
 	return _pick_random_cards(PREDATOR_IDS, count, excluded)
 
@@ -208,6 +248,104 @@ func _pick_random_cards(card_ids: Array, count: int, excluded: Array) -> Array:
 		picked_cards.append(get_by_id(card_id))
 
 	return picked_cards
+
+
+func _pick_random_predator_hand_pattern() -> String:
+	var random_index := _random.randi_range(0, PREDATOR_HAND_PATTERNS.size() - 1)
+	return PREDATOR_HAND_PATTERNS[random_index]
+
+
+func _get_random_predator_hand_values(pattern: String) -> Array:
+	match pattern:
+		PREDATOR_HAND_PAIR:
+			return _get_repeated_value_hand(2)
+		PREDATOR_HAND_THREE_OF_A_KIND:
+			return _get_repeated_value_hand(3)
+		PREDATOR_HAND_TWO_PAIR:
+			return _get_two_pair_values()
+		PREDATOR_HAND_STRAIGHT:
+			return _get_straight_values()
+		PREDATOR_HAND_FULL_HOUSE:
+			return _get_full_house_values()
+		_:
+			return [_get_random_card_value()]
+
+
+func _get_repeated_value_hand(count: int) -> Array:
+	var value := _get_random_card_value()
+	var values := []
+
+	for _index in range(count):
+		values.append(value)
+
+	return values
+
+
+func _get_two_pair_values() -> Array:
+	var pair_values := _get_random_unique_values(2)
+	return [pair_values[0], pair_values[0], pair_values[1], pair_values[1]]
+
+
+func _get_straight_values() -> Array:
+	var random_index := _random.randi_range(0, PREDATOR_STRAIGHT_VALUES.size() - 1)
+	return PREDATOR_STRAIGHT_VALUES[random_index].duplicate()
+
+
+func _get_full_house_values() -> Array:
+	var values := _get_random_unique_values(2)
+	return [values[0], values[0], values[0], values[1], values[1]]
+
+
+func _get_random_unique_values(count: int) -> Array:
+	var values := []
+
+	while values.size() < count:
+		var value := _get_random_card_value()
+
+		if not values.has(value):
+			values.append(value)
+
+	return values
+
+
+func _get_random_card_value() -> int:
+	return _random.randi_range(1, 13)
+
+
+func _pick_random_predators_with_values(values: Array, excluded_ids: Dictionary) -> Array:
+	var picked_cards := []
+	var picked_ids := {}
+
+	for value in values:
+		var available_ids := _get_predator_ids_for_value(int(value), excluded_ids, picked_ids)
+
+		if available_ids.is_empty():
+			return []
+
+		var random_index := _random.randi_range(0, available_ids.size() - 1)
+		var card_id: String = available_ids[random_index]
+		picked_ids[card_id] = true
+		picked_cards.append(get_by_id(card_id))
+
+	return picked_cards
+
+
+func _get_predator_ids_for_value(
+	value: int, excluded_ids: Dictionary, picked_ids: Dictionary
+) -> Array:
+	var available_ids := []
+
+	for card_id in PREDATOR_IDS:
+		var card := get_by_id(card_id)
+
+		if (
+			int(card.get("value", 0)) == value
+			and not excluded_ids.has(card_id)
+			and not picked_ids.has(card_id)
+		):
+			available_ids.append(card_id)
+
+	return available_ids
 
 
 func _get_excluded_ids(excluded: Array) -> Dictionary:

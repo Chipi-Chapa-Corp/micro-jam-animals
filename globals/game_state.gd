@@ -11,7 +11,7 @@ signal player_discards_count_changed(player_discards_count: int)
 const DEFAULT_SCORE: int = 0
 const DEFAULT_HEALTH: int = 100
 const DEFAULT_ROUND: int = 0
-const DEFAULT_PREDATOR_COUNT: int = 3
+const RANDOM_PREDATOR_HAND_COUNT: int = -1
 const DEFAULT_PLAYER_HAND_COUNT: int = 10
 const DEFAULT_PLAYER_DISCARDS_COUNT: int = 3
 const MAX_PLAYER_TABLE_CARDS: int = 5
@@ -89,8 +89,14 @@ func get_predators() -> Array:
 	return _predators.duplicate()
 
 
-func generate_predators(count: int = DEFAULT_PREDATOR_COUNT, excluded: Array = []) -> Array:
-	var next_predators := Cards.pick_random_predators(count, excluded)
+func generate_predators(count: int = RANDOM_PREDATOR_HAND_COUNT, excluded: Array = []) -> Array:
+	var next_predators := []
+
+	if count == RANDOM_PREDATOR_HAND_COUNT:
+		next_predators = Cards.pick_random_predator_hand(excluded)
+	else:
+		next_predators = Cards.pick_random_predators(count, excluded)
+
 	_predators = next_predators
 	return get_predators()
 
