@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/credits/script.gd" id="1_credits"]
+
+[node name="Credits" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_credits")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.06, 0.07, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Menu" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="CenterContainer/Menu"]
+layout_mode = 2
+text = "Credits"
+horizontal_alignment = 1
+
+[node name="Body" type="Label" parent="CenterContainer/Menu"]
+layout_mode = 2
+text = "Made for Micro Jam"
+horizontal_alignment = 1
+
+[node name="Back" type="Button" parent="CenterContainer/Menu"]
+layout_mode = 2
+text = "Back"
+
+[connection signal="pressed" from="CenterContainer/Menu/Back" to="." method="_on_back_pressed"]
