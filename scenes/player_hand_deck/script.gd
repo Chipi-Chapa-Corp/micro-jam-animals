@@ -10,7 +10,11 @@ const CARD_STEP: float = 78.0
 const MAX_FAN_ROTATION_DEGREES: float = 5.0
 const MAX_FAN_DROP: float = 18.0
 const TOP_PADDING: float = 20.0
+const SHIFT_DURATION: float = 0.14
 const HAND_INDEX_META: String = "player_hand_index"
+
+var _has_rendered_cards: bool = false
+var _layout_tween: Tween
 
 
 func _ready() -> void:
@@ -24,22 +28,37 @@ func _notification(what: int) -> void:
 
 
 func render_cards() -> void:
-	_clear_cards()
+	if not _has_rendered_cards:
+		_clear_cards()
 
+	var existing_cards := _get_cards_by_id()
+	var moving_cards := []
+	var next_card_ids := {}
 	var player_hand := GameState.get_player_hand()
 
 	for index in range(player_hand.size()):
 		var player_card = player_hand[index]
 		if player_card is Dictionary:
-			_add_card(player_card, index)
+			var card_id := _get_player_card_id(player_card)
+			var card: CardScene = existing_cards.get(card_id, null) as CardScene
+			next_card_ids[card_id] = true
 
-	_layout_cards()
+			if card:
+				moving_cards.append(card)
+				card.set_meta(HAND_INDEX_META, index)
+			else:
+				_add_card(player_card, index)
+
+	_remove_missing_cards(next_card_ids)
+
+	_layout_cards(_has_rendered_cards, moving_cards)
+	_has_rendered_cards = true
 
 
 func get_card_by_id(card_id: String) -> CardScene:
 	for child in get_children():
 		var card := child as CardScene
-		if card and card.id == card_id:
+		if card and card.has_meta(HAND_INDEX_META) and card.id == card_id:
 			return card
 
 	return null
@@ -53,7 +72,11 @@ func _add_card(player_card: Dictionary, hand_index: int) -> void:
 	add_child(card)
 
 
-func _layout_cards() -> void:
+func _layout_cards(animate_shift: bool = false, moving_cards: Array = []) -> void:
+	if _layout_tween:
+		_layout_tween.kill()
+		_layout_tween = null
+
 	var cards := _get_cards_in_hand_order()
 	var card_count := cards.size()
 	if card_count == 0:
@@ -67,17 +90,36 @@ func _layout_cards() -> void:
 	var start_x := (deck_width - total_width) * 0.5
 	var center_index := float(card_count - 1) * 0.5
 	var half_count := maxf(center_index, 1.0)
+	var should_animate_shift := animate_shift and not moving_cards.is_empty()
+	var tween_started := false
+	if should_animate_shift:
+		_layout_tween = create_tween()
+		_layout_tween.set_trans(Tween.TRANS_SINE)
+		_layout_tween.set_ease(Tween.EASE_OUT)
 
 	for index in range(card_count):
 		var card := cards[index] as CardScene
 		var center_offset := float(index) - center_index
 		var normalized_offset := center_offset / half_count
 		var fan_drop := absf(normalized_offset) * MAX_FAN_DROP
+		var target_position := Vector2(start_x + (CARD_STEP * float(index)), TOP_PADDING + fan_drop)
+		var target_rotation_degrees := normalized_offset * MAX_FAN_ROTATION_DEGREES
 
-		card.position = Vector2(start_x + (CARD_STEP * float(index)), TOP_PADDING + fan_drop)
 		card.pivot_offset = CARD_SIZE * 0.5
-		card.rotation_degrees = normalized_offset * MAX_FAN_ROTATION_DEGREES
 		card.z_index = card_count - index
+
+		if should_animate_shift and moving_cards.has(card):
+			if tween_started:
+				_layout_tween.parallel().tween_property(card, "position", target_position, SHIFT_DURATION)
+			else:
+				_layout_tween.tween_property(card, "position", target_position, SHIFT_DURATION)
+				tween_started = true
+			_layout_tween.parallel().tween_property(
+				card, "rotation_degrees", target_rotation_degrees, SHIFT_DURATION
+			)
+		else:
+			card.position = target_position
+			card.rotation_degrees = target_rotation_degrees
 
 	_sync_hover_order(cards)
 
@@ -90,7 +132,11 @@ func _sync_hover_order(cards: Array) -> void:
 
 
 func _get_cards_in_hand_order() -> Array:
-	var cards := get_children()
+	var cards := []
+	for child in get_children():
+		var card := child as CardScene
+		if card and card.has_meta(HAND_INDEX_META):
+			cards.append(card)
 	cards.sort_custom(_sort_cards_by_hand_index)
 	return cards
 
@@ -100,9 +146,37 @@ func _sort_cards_by_hand_index(first: Node, second: Node) -> bool:
 
 
 func _clear_cards() -> void:
+	if _layout_tween:
+		_layout_tween.kill()
+		_layout_tween = null
+
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
+
+
+func _get_cards_by_id() -> Dictionary:
+	var cards_by_id := {}
+	for child in get_children():
+		var card := child as CardScene
+		if card and card.has_meta(HAND_INDEX_META):
+			cards_by_id[card.id] = card
+
+	return cards_by_id
+
+
+func _remove_missing_cards(next_card_ids: Dictionary) -> void:
+	for child in get_children():
+		var card := child as CardScene
+		if card and card.has_meta(HAND_INDEX_META) and not next_card_ids.has(card.id):
+			remove_child(card)
+			card.queue_free()
+
+
+func _get_player_card_id(player_card: Dictionary) -> String:
+	return "%s_%s_%s" % [
+		CARD_KIND, str(player_card.get("suit", "")), int(player_card.get("value", 0))
+	]
 
 
 func _on_card_clicked(card_id: String) -> void:

@@ -4,9 +4,8 @@
 [ext_resource type="PackedScene" path="res://scenes/card/scene.tscn" id="2_card"]
 [ext_resource type="Texture2D" path="res://assets/prey_air_4.png" id="3_prey_air_4"]
 
-[node name="PreyDeck" type="HBoxContainer"]
+[node name="PreyDeck" type="Control"]
 layout_mode = 2
-theme_override_constants/separation = 16
 script = ExtResource("1_prey_deck")
 
 [node name="Card1" parent="." instance=ExtResource("2_card")]
