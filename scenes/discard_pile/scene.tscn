@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://d3ae0qxjs1s5t"]
 
-[ext_resource type="Script" path="res://scenes/discard_pile/script.gd" id="1_discard_pile"]
+[ext_resource type="Script" uid="uid://d3dc7n8j2pn65" path="res://scenes/discard_pile/script.gd" id="1_discard_pile"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0, 0, 0, 0.18)
@@ -21,15 +21,15 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="DiscardPile" type="Control"]
+[node name="DiscardPile" type="Control" unique_id=64831617]
 custom_minimum_size = Vector2(110, 154)
-layout_mode = 2
+layout_mode = 3
+anchors_preset = 0
 offset_right = 110.0
 offset_bottom = 154.0
-mouse_filter = 0
 script = ExtResource("1_discard_pile")
 
-[node name="Shadow" type="Panel" parent="."]
+[node name="Shadow" type="Panel" parent="." unique_id=145184863]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,7 +43,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_shadow")
 
-[node name="Face" type="Panel" parent="."]
+[node name="Face" type="Panel" parent="." unique_id=7260010]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,14 +53,13 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_face")
 
-[node name="Label" type="Label" parent="Face"]
+[node name="Label" type="Label" parent="Face" unique_id=1986675710]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.88, 0.91, 0.88, 1)
 theme_override_font_sizes/font_size = 18
 text = "Discard"

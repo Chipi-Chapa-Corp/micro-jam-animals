@@ -51,7 +51,6 @@ var id: String:
 @onready var color_panel: Panel = $Face/Color
 @onready var predator_gradient: Control = $Face/PredatorGradient
 @onready var art: TextureRect = $Face/Art
-@onready var bottom_art: TextureRect = $Face/BottomArt
 @onready var top_value: Label = $Face/TopValue
 @onready var top_suit: TextureRect = $Face/TopSuit
 @onready var bottom_value: Label = $Face/BottomValue
@@ -252,7 +251,6 @@ func _refresh_art() -> void:
 	var texture := load(_get_asset_path()) as Texture2D
 	var suit_texture := load(_get_suit_asset_path()) as Texture2D
 	art.texture = texture
-	bottom_art.texture = texture
 	top_suit.texture = suit_texture
 	bottom_suit.texture = suit_texture
 	top_value.text = _get_value_label()
@@ -298,7 +296,6 @@ func _refresh_suit_color() -> void:
 func _refresh_art_layout() -> void:
 	_set_control_rect(art, CARD_ART_CENTER, CARD_ART_SIZE, art_scale)
 	art.rotation_degrees = art_rotation_degrees
-	bottom_art.visible = false
 	_sync_pivots()
 
 
@@ -430,7 +427,6 @@ func _sync_pivots() -> void:
 	back.pivot_offset = back.size * 0.5
 	shadow.pivot_offset = shadow.size * 0.5
 	art.pivot_offset = art.size * 0.5
-	bottom_art.pivot_offset = bottom_art.size * 0.5
 
 
 func _show_front() -> void:

@@ -11,38 +11,44 @@ const CARD_MOVE_LAYOUT_FRAMES: int = 3
 const CARD_DRAW_MOVE_DURATION: float = 0.58
 const CARD_DRAW_FLIP_DURATION: float = 0.24
 const CARD_DRAW_STAGGER_DURATION: float = 0.08
+const ROUND_DISCARD_MOVE_DURATION: float = 0.58
+const ROUND_DISCARD_FLIP_DURATION: float = 0.24
+const ROUND_DISCARD_STAGGER_DURATION: float = 0.06
+const ROUND_PILE_SLIDE_DURATION: float = 0.28
 const SCORE_REVEAL_INTERVAL: float = 0.48
 const SCORE_PANEL_SLIDE_DURATION: float = 0.18
-const SCORE_PANEL_WIDTH: float = 190.0
-const SCORE_PANEL_BASE_HEIGHT: float = 46.0
-const SCORE_PANEL_ROW_HEIGHT: float = 20.0
-const SCORE_PANEL_MIN_HEIGHT: float = 72.0
 const SUIT_ORDER: Array[String] = [Cards.SUIT_WATER, Cards.SUIT_LAND, Cards.SUIT_AIR]
+const SCORE_LOWER_COLOR: Color = Color(0.86, 0.18, 0.14)
+const SCORE_SUIT_COLORS: Dictionary = {
+	Cards.SUIT_WATER: Color(111.0 / 255.0, 111.0 / 255.0, 175.0 / 255.0),
+	Cards.SUIT_LAND: Color(126.0 / 255.0, 160.0 / 255.0, 118.0 / 255.0),
+	Cards.SUIT_AIR: Color(171.0 / 255.0, 177.0 / 255.0, 188.0 / 255.0),
+}
 
 @onready var pause_menu: Control = $UI/PauseMenu
 @onready var play_button: Button = $UI/PlayButton
 @onready var card_animation_layer: Control = $UI/CardAnimationLayer
+@onready var predator_deck: PredatorDeck = $UI/PredatorDeckContainer/PredatorDeck
+@onready var score_delta_label: Label = $UI/ScoreDeltaLabel
 @onready var discard_pile: DiscardPile = $UI/PreyDeckContainer/DiscardPile
 @onready var prey_deck: PreyDeck = $UI/PreyDeckContainer/PreyDeckCenter/PreyDeck
 @onready var player_hand_deck: PlayerHandDeck = $UI/PlayerHandDeckContainer/PlayerHandDeck
 @onready var prey_pile: PreyPile = $UI/PreyPile
-@onready var predator_score_panel: Panel = $UI/PredatorScorePanel
+@onready var predator_score_panel: Control = $UI/PredatorScorePanel
 @onready var predator_hand_label: Label = $UI/PredatorScorePanel/Margin/Content/HandLabel
-@onready var predator_suit_rows: VBoxContainer = $UI/PredatorScorePanel/Margin/Content/SuitRows
-@onready var predator_water_row: Label = $UI/PredatorScorePanel/Margin/Content/SuitRows/Water
-@onready var predator_land_row: Label = $UI/PredatorScorePanel/Margin/Content/SuitRows/Land
-@onready var predator_air_row: Label = $UI/PredatorScorePanel/Margin/Content/SuitRows/Air
-@onready var score_panel: Panel = $UI/PreyDeckContainer/ScorePanel
-@onready var hand_label: Label = $UI/PreyDeckContainer/ScorePanel/Margin/Content/HandLabel
-@onready var suit_rows: VBoxContainer = $UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows
-@onready var water_row: Label = $UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows/Water
-@onready var land_row: Label = $UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows/Land
-@onready var air_row: Label = $UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows/Air
+@onready var score_panel: Control = $UI/PreyDeckContainer/ScorePanel
+@onready var hand_label: Label = $UI/PreyDeckContainer/ScorePanel/HeaderPanel/Margin/Content/HandLabel
+@onready var suit_rows: VBoxContainer = $UI/PreyDeckContainer/ScorePanel/SuitRows
+@onready var water_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Water/Score
+@onready var land_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Land/Score
+@onready var air_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Air/Score
 @onready var health_label: Label = $UI/HudPanel/Margin/Content/HealthLabel
 @onready var score_label: Label = $UI/HudPanel/Margin/Content/ScoreLabel
 
 var _is_discard_animating: bool = false
 var _is_round_resolving: bool = false
+var _prey_suit_scores: Dictionary = {}
+var _predator_compare_scores: Dictionary = {}
 
 
 func _ready() -> void:
@@ -78,8 +84,8 @@ func _on_quit_pressed() -> void:
 	get_tree().quit()
 
 
-func _set_pause_menu_visible(is_visible: bool) -> void:
-	pause_menu.visible = is_visible
+func _set_pause_menu_visible(should_show: bool) -> void:
+	pause_menu.visible = should_show
 
 
 func _refresh_hud() -> void:
@@ -89,15 +95,18 @@ func _refresh_hud() -> void:
 
 func _refresh_score_preview() -> void:
 	var result := GameState.get_player_table_score_result()
+	score_delta_label.visible = false
 	if GameState.get_player_table().is_empty():
 		score_panel.visible = false
+		_reset_score_rows(result)
 		_set_score_panel_row_count(score_panel, 0, false)
 		_refresh_predator_raw_preview()
+		score_delta_label.visible = false
 		return
 
 	score_panel.visible = true
 	_refresh_prey_hand_preview(result)
-	_refresh_predator_target_rows(result)
+	_refresh_predator_score_preview(result)
 
 
 func _refresh_play_button() -> void:
@@ -126,7 +135,15 @@ func _on_play_pressed() -> void:
 		get_tree().change_scene_to_file(GAME_OVER_SCENE)
 		return
 
+	var previous_hand_card_ids := _get_card_ids(GameState.get_player_hand())
+	score_delta_label.visible = false
+	await _slide_round_piles_in()
+	await _animate_round_cards_to_discard()
 	GameState.go_next_round()
+	_set_input_available(false)
+	await _draw_player_hand_cards_from_pile(
+		_get_cards_without_ids(GameState.get_player_hand(), previous_hand_card_ids)
+	)
 	_is_round_resolving = false
 	_set_input_available(true)
 	_refresh_score_preview()
@@ -137,67 +154,38 @@ func _reveal_score_result(result: Dictionary) -> void:
 	score_panel.visible = true
 	predator_score_panel.visible = true
 	_refresh_prey_hand_preview(result)
-	_refresh_predator_target_rows(result)
+	_refresh_predator_score_preview(result)
 	_reset_score_rows(result)
+	score_delta_label.visible = false
 	await _show_score_rows()
 	await _reveal_prey_score_steps(result)
-	await _reveal_predator_score_steps(result)
-	await get_tree().create_timer(SCORE_REVEAL_INTERVAL * 2.0).timeout
+	await _reveal_hand_multiplier_step(result)
+	await _reveal_suit_matchup_steps(result)
 
 
 func _refresh_prey_hand_preview(result: Dictionary) -> void:
-	hand_label.text = "%s +%s" % [
+	hand_label.text = "%s %s" % [
 		str(result.get("hand_label", "High Card")),
-		_format_score(float(result.get("score_gain", 0.0)))
+		_format_score(float(result.get("scoring_value", 0.0)))
 	]
 	for suit in SUIT_ORDER:
-		var prey_row := _get_suit_row(suit)
-		prey_row.visible = false
-		prey_row.text = "%s 0" % _get_suit_label(suit)
+		_set_prey_suit_score(suit, 0.0, false)
 
-	suit_rows.visible = false
+	suit_rows.visible = true
 	suit_rows.modulate.a = 1.0
 	_set_score_panel_row_count(score_panel, 0, false)
 
 
 func _refresh_predator_raw_preview() -> void:
 	var result := GameState.get_player_table_score_result()
-	predator_score_panel.visible = true
-	predator_hand_label.text = str(result.get("predator_hand_label", "High Card"))
-
-	var raw_scores := {
-		Cards.SUIT_WATER: 0,
-		Cards.SUIT_LAND: 0,
-		Cards.SUIT_AIR: 0,
-	}
-	for predator in GameState.get_predators():
-		if not (predator is Dictionary):
-			continue
-
-		var suit := str(predator.get("suit", ""))
-		if raw_scores.has(suit):
-			raw_scores[suit] = int(raw_scores[suit]) + _get_card_value(predator)
-
-	var row_count := 0
-	for suit in SUIT_ORDER:
-		var row := _get_predator_suit_row(suit)
-		var score := int(raw_scores[suit])
-		row.visible = score > 0
-		row.text = "%s %s" % [_get_suit_label(suit), int(raw_scores[suit])]
-		if row.visible:
-			row_count += 1
-
-	predator_suit_rows.visible = row_count > 0
-	_set_score_panel_row_count(predator_score_panel, row_count, false)
+	_set_predator_total_score(result, false)
 
 
 func _reset_score_rows(result: Dictionary) -> void:
 	var suits: Dictionary = result.get("suits", {})
 	for suit in SUIT_ORDER:
 		var suit_result: Dictionary = suits.get(suit, {})
-		var row := _get_suit_row(suit)
-		row.visible = int(suit_result.get("prey_count", 0)) > 0
-		row.text = "%s 0" % _get_suit_label(suit)
+		_set_prey_suit_score(suit, 0.0, int(suit_result.get("prey_count", 0)) > 0)
 
 
 func _show_score_rows() -> void:
@@ -213,20 +201,8 @@ func _show_score_rows() -> void:
 	await tween.finished
 
 
-func _set_score_panel_row_count(panel: Panel, row_count: int, animate: bool) -> void:
-	var target_height := maxf(
-		SCORE_PANEL_MIN_HEIGHT, SCORE_PANEL_BASE_HEIGHT + SCORE_PANEL_ROW_HEIGHT * float(row_count)
-	)
-	var target_size := Vector2(SCORE_PANEL_WIDTH, target_height)
-	if not animate:
-		panel.size = target_size
-		return
-
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_SINE)
-	tween.set_ease(Tween.EASE_OUT)
-	tween.tween_property(panel, "size", target_size, SCORE_PANEL_SLIDE_DURATION)
-	await tween.finished
+func _set_score_panel_row_count(_panel: Control, _row_count: int, _animate: bool) -> void:
+	pass
 
 
 func _reveal_prey_score_steps(result: Dictionary) -> void:
@@ -235,48 +211,60 @@ func _reveal_prey_score_steps(result: Dictionary) -> void:
 			continue
 
 		var suit := str(step.get("suit", ""))
-		var row := _get_suit_row(suit)
 		var card_id := str(step.get("id", ""))
 		await _pulse_prey_card(card_id)
-		row.text = "%s %s" % [
-			_get_suit_label(suit), _format_score(float(step.get("score_after", 0.0)))
-		]
+		_set_prey_suit_score(suit, float(step.get("score_after", 0.0)), true)
+		_show_score_change_label(suit, float(step.get("amount", 0.0)))
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
 
-func _reveal_predator_score_steps(result: Dictionary) -> void:
+func _reveal_hand_multiplier_step(result: Dictionary) -> void:
+	var suits: Dictionary = result.get("suits", {})
+	await _pulse_scoring_hand_cards(result)
+	_show_hand_multiplier_label(float(result.get("hand_multiplier", 1.0)))
+
+	for suit in SUIT_ORDER:
+		var suit_result: Dictionary = suits.get(suit, {})
+		if int(suit_result.get("prey_count", 0)) <= 0:
+			continue
+
+		_set_prey_suit_score(suit, float(suit_result.get("prey_score", 0.0)), true)
+
+	await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
+
+
+func _reveal_suit_matchup_steps(result: Dictionary) -> void:
 	var suits: Dictionary = result.get("suits", {})
 	for suit in SUIT_ORDER:
 		var suit_result: Dictionary = suits.get(suit, {})
 		if int(suit_result.get("prey_count", 0)) <= 0:
 			continue
 
-		var prey_row := _get_suit_row(suit)
-		prey_row.text = "%s %s" % [
-			_get_suit_label(suit), _format_score(float(suit_result.get("prey_score", 0.0)))
-		]
+		await _pulse_suit_matchup_cards(result, suit)
+		_set_prey_suit_score(suit, float(suit_result.get("prey_matchup_score", 0.0)), true)
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
 
-func _refresh_predator_target_rows(result: Dictionary) -> void:
-	predator_hand_label.text = str(result.get("predator_hand_label", "High Card"))
+func _refresh_predator_score_preview(result: Dictionary) -> void:
+	_set_predator_total_score(result, true)
+
+
+func _set_predator_total_score(result: Dictionary, compare_played_suits: bool) -> void:
+	predator_score_panel.visible = true
+	predator_hand_label.text = "%s %s" % [
+		str(result.get("predator_hand_label", "High Card")),
+		_format_score(float(result.get("predator_score", 0.0)))
+	]
+
 	var suits: Dictionary = result.get("suits", {})
-	var row_count := 0
 	for suit in SUIT_ORDER:
 		var suit_result: Dictionary = suits.get(suit, {})
-		var row := _get_predator_suit_row(suit)
-		row.visible = int(suit_result.get("prey_count", 0)) > 0
-		if not row.visible:
-			continue
+		if compare_played_suits and int(suit_result.get("prey_count", 0)) > 0:
+			_predator_compare_scores[suit] = float(result.get("predator_score", 0.0))
+		else:
+			_predator_compare_scores.erase(suit)
 
-		row_count += 1
-		row.text = "%s %s" % [
-			_get_suit_label(suit),
-			_format_score(float(suit_result.get("predator_target_score", 0.0)))
-		]
-
-	predator_suit_rows.visible = row_count > 0
-	_set_score_panel_row_count(predator_score_panel, row_count, false)
+		_refresh_suit_score_color(suit)
 
 
 func _pulse_prey_card(card_id: String) -> void:
@@ -287,6 +275,112 @@ func _pulse_prey_card(card_id: String) -> void:
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
 
+func _pulse_scoring_hand_cards(result: Dictionary) -> void:
+	var first_card: CardScene
+
+	for card in result.get("scoring_cards", []):
+		if not (card is Dictionary):
+			continue
+
+		var prey_card := prey_deck.get_card_by_id(str(card.get("id", "")))
+		if prey_card:
+			if first_card:
+				prey_card.pulse_highlight()
+			else:
+				first_card = prey_card
+
+	if first_card:
+		await first_card.pulse_highlight()
+
+
+func _pulse_suit_matchup_cards(result: Dictionary, suit: String) -> void:
+	var first_card: CardScene
+
+	for card in result.get("scoring_cards", []):
+		if not (card is Dictionary) or str(card.get("suit", "")) != suit:
+			continue
+
+		var prey_card := prey_deck.get_card_by_id(str(card.get("id", "")))
+		if prey_card:
+			if first_card:
+				prey_card.pulse_highlight()
+			else:
+				first_card = prey_card
+
+	for predator in GameState.get_predators():
+		if not (predator is Dictionary):
+			continue
+
+		var predator_card := predator_deck.get_card_by_id(str(predator.get("id", "")))
+		if predator_card:
+			if first_card:
+				predator_card.pulse_highlight()
+			else:
+				first_card = predator_card
+
+	if first_card:
+		await first_card.pulse_highlight()
+
+
+func _set_prey_suit_score(suit: String, score: float, should_show: bool) -> void:
+	var row := _get_suit_row(suit)
+	row.visible = true
+	row.text = _format_score(score)
+	if should_show:
+		_prey_suit_scores[suit] = score
+	else:
+		_prey_suit_scores.erase(suit)
+
+	_refresh_suit_score_color(suit)
+
+
+func _refresh_suit_score_color(suit: String) -> void:
+	var prey_row := _get_suit_row(suit)
+	if (
+		not prey_row.visible
+		or not _prey_suit_scores.has(suit)
+		or not _predator_compare_scores.has(suit)
+	):
+		_reset_suit_row_color(prey_row)
+		return
+
+	var prey_score := float(_prey_suit_scores[suit])
+	var predator_score := float(_predator_compare_scores[suit])
+	var color := _get_suit_score_color(suit) if prey_score >= predator_score else SCORE_LOWER_COLOR
+	prey_row.add_theme_color_override("font_color", color)
+	_refresh_score_delta_label(suit, prey_score, predator_score, color)
+
+
+func _reset_suit_row_color(row: Label) -> void:
+	row.remove_theme_color_override("font_color")
+
+
+func _get_suit_score_color(suit: String) -> Color:
+	return Color(SCORE_SUIT_COLORS.get(suit, Color.WHITE))
+
+
+func _refresh_score_delta_label(
+	suit: String, prey_score: float, predator_score: float, color: Color
+) -> void:
+	var delta := prey_score - predator_score
+	var sign := "+" if delta >= 0.0 else ""
+	score_delta_label.visible = true
+	score_delta_label.text = "%s %s%s" % [_get_suit_label(suit), sign, _format_score(delta)]
+	score_delta_label.add_theme_color_override("font_color", color)
+
+
+func _show_score_change_label(suit: String, amount: float) -> void:
+	score_delta_label.visible = true
+	score_delta_label.text = "%s +%s" % [_get_suit_label(suit), _format_score(amount)]
+	score_delta_label.add_theme_color_override("font_color", _get_suit_score_color(suit))
+
+
+func _show_hand_multiplier_label(multiplier: float) -> void:
+	score_delta_label.visible = true
+	score_delta_label.text = "x%s" % _format_score(multiplier)
+	score_delta_label.add_theme_color_override("font_color", Color.WHITE)
+
+
 func _get_suit_row(suit: String) -> Label:
 	match suit:
 		Cards.SUIT_WATER:
@@ -295,16 +389,6 @@ func _get_suit_row(suit: String) -> Label:
 			return land_row
 		_:
 			return air_row
-
-
-func _get_predator_suit_row(suit: String) -> Label:
-	match suit:
-		Cards.SUIT_WATER:
-			return predator_water_row
-		Cards.SUIT_LAND:
-			return predator_land_row
-		_:
-			return predator_air_row
 
 
 func _get_visible_suit_row_count() -> int:
@@ -331,14 +415,6 @@ func _format_score(value: float) -> String:
 		return str(int(roundf(value)))
 
 	return "%.1f" % value
-
-
-func _get_card_value(card: Dictionary) -> int:
-	var value := int(card.get("value", 0))
-	if value == 1:
-		return 14
-
-	return value
 
 
 func _on_player_hand_card_move_animation_requested(
@@ -372,24 +448,7 @@ func _on_discard_pile_clicked() -> void:
 func _on_player_cards_discarded(
 	_discarded_cards: Array, new_cards: Array, _player_discards_count: int
 ) -> void:
-	if new_cards.is_empty():
-		return
-
-	prey_pile.begin_draw_animations()
-	var from_global_position := prey_pile.get_draw_global_position()
-	var target_states := _hide_player_hand_draw_targets(new_cards)
-	for index in range(new_cards.size()):
-		var card = new_cards[index]
-		if card is Dictionary:
-			if index == new_cards.size() - 1:
-				await _animate_card_draw_from_pile(card, from_global_position, target_states)
-			else:
-				_animate_card_draw_from_pile(card, from_global_position, target_states)
-
-			if index < new_cards.size() - 1:
-				await get_tree().create_timer(CARD_DRAW_STAGGER_DURATION).timeout
-
-	prey_pile.end_draw_animations()
+	await _draw_player_hand_cards_from_pile(new_cards)
 
 
 func _on_score_changed(_score: int) -> void:
@@ -479,6 +538,77 @@ func _animate_card_move(
 		target_card.mouse_filter = target_mouse_filter
 
 
+func _animate_round_cards_to_discard() -> void:
+	var cards := _get_round_discard_cards()
+	if cards.is_empty():
+		return
+
+	var move_tween: Tween
+	var discard_global_position := discard_pile.get_drop_global_position()
+	for index in range(cards.size()):
+		var card := cards[index] as CardScene
+		if not is_instance_valid(card):
+			continue
+
+		move_tween = card.tween_discard_to(
+			discard_global_position,
+			1000 + index,
+			ROUND_DISCARD_MOVE_DURATION,
+			ROUND_DISCARD_FLIP_DURATION
+		)
+
+		if index < cards.size() - 1:
+			await get_tree().create_timer(ROUND_DISCARD_STAGGER_DURATION).timeout
+
+	if move_tween:
+		await move_tween.finished
+
+
+func _slide_round_piles_in() -> void:
+	var did_slide := discard_pile.slide_in_for_round_reset()
+	did_slide = prey_pile.slide_in_for_round_reset() or did_slide
+	if did_slide:
+		await get_tree().create_timer(ROUND_PILE_SLIDE_DURATION).timeout
+
+
+func _get_round_discard_cards() -> Array:
+	var cards := []
+	cards.append_array(_get_card_children(prey_deck))
+	cards.append_array(_get_card_children(predator_deck))
+	return cards
+
+
+func _get_card_children(parent: Node) -> Array:
+	var cards := []
+	for child in parent.get_children():
+		var card := child as CardScene
+		if card:
+			cards.append(card)
+
+	return cards
+
+
+func _draw_player_hand_cards_from_pile(cards: Array) -> void:
+	var drawable_cards := _get_dictionary_cards(cards)
+	if drawable_cards.is_empty():
+		return
+
+	prey_pile.begin_draw_animations()
+	var target_states := _hide_player_hand_draw_targets(drawable_cards)
+	var from_global_position := prey_pile.get_draw_global_position()
+	for index in range(drawable_cards.size()):
+		var card: Dictionary = drawable_cards[index]
+		if index == drawable_cards.size() - 1:
+			await _animate_card_draw_from_pile(card, from_global_position, target_states)
+		else:
+			_animate_card_draw_from_pile(card, from_global_position, target_states)
+
+		if index < drawable_cards.size() - 1:
+			await get_tree().create_timer(CARD_DRAW_STAGGER_DURATION).timeout
+
+	prey_pile.end_draw_animations()
+
+
 func _animate_card_draw_from_pile(
 	card: Dictionary, from_global_position: Vector2, target_states: Dictionary = {}
 ) -> void:
@@ -564,13 +694,45 @@ func _hide_player_hand_draw_targets(cards: Array) -> Dictionary:
 			continue
 
 		target_states[card_id] = {
-			"modulate": target_card.modulate,
+			"modulate": Color.WHITE,
 			"mouse_filter": target_card.mouse_filter,
 		}
 		target_card.modulate.a = 0.0
 		target_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	return target_states
+
+
+func _get_card_ids(cards: Array) -> Dictionary:
+	var card_ids := {}
+	for card in cards:
+		if card is Dictionary:
+			card_ids[str(card.get("id", ""))] = true
+
+	return card_ids
+
+
+func _get_cards_without_ids(cards: Array, excluded_card_ids: Dictionary) -> Array:
+	var next_cards := []
+	for card in cards:
+		if not (card is Dictionary):
+			continue
+
+		if excluded_card_ids.has(str(card.get("id", ""))):
+			continue
+
+		next_cards.append(card)
+
+	return next_cards
+
+
+func _get_dictionary_cards(cards: Array) -> Array:
+	var dictionary_cards := []
+	for card in cards:
+		if card is Dictionary:
+			dictionary_cards.append(card)
+
+	return dictionary_cards
 
 
 func _get_target_card(target_deck: Node, card_id: String) -> CardScene:

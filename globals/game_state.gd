@@ -247,7 +247,9 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 	var hand_multiplier := float(HAND_MULTIPLIERS.get(hand_key, 1.0))
 	var score_gain := float(scoring_value) * hand_multiplier
 	var predator_hand_key := _get_hand_key(predators)
-	var predator_score := _get_cards_score_value(predators)
+	var predator_raw_score := _get_cards_score_value(predators)
+	var predator_hand_multiplier := float(HAND_MULTIPLIERS.get(predator_hand_key, 1.0))
+	var predator_score := float(predator_raw_score) * predator_hand_multiplier
 
 	var card_steps := []
 	var suit_results := {}
@@ -260,6 +262,8 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 		"score_gain": score_gain,
 		"predator_hand_key": predator_hand_key,
 		"predator_hand_label": str(HAND_LABELS.get(predator_hand_key, "High Card")),
+		"predator_hand_multiplier": predator_hand_multiplier,
+		"predator_raw_score": predator_raw_score,
 		"predator_score": predator_score,
 		"scoring_cards": scoring_prey,
 		"discarded_cards": discarded_prey,
@@ -317,11 +321,15 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 			predator_target_score += raw_amount
 
 		var prey_score := base_prey_score * hand_multiplier
-		var escaped := prey_count > 0 and prey_score >= predator_target_score
+		var prey_matchup_score := prey_score
+		if predator_target_score > 0.0:
+			prey_matchup_score = prey_score * (float(predator_raw_score) / predator_target_score)
+
+		var escaped := prey_count > 0 and prey_matchup_score >= predator_score
 		var damage := 0
-		if prey_count > 0 and not escaped and predator_target_score > 0.0:
+		if prey_count > 0 and not escaped and predator_score > 0:
 			damage = int(
-				ceil(((predator_target_score - prey_score) / predator_target_score) * DAMAGE_SCALE)
+				ceil(((predator_score - prey_matchup_score) / predator_score) * DAMAGE_SCALE)
 			)
 			damage *= prey_count
 
@@ -330,6 +338,7 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 			"prey_count": prey_count,
 			"base_prey_score": base_prey_score,
 			"prey_score": prey_score,
+			"prey_matchup_score": prey_matchup_score,
 			"predator_target_score": predator_target_score,
 			"predator_score": predator_score,
 			"escaped": escaped,
@@ -466,8 +475,8 @@ func _get_cards_with_rank_count(cards: Array, count: int) -> Array:
 	var best_rank := -1
 
 	for rank in ranks:
-		var rank_cards: Array = ranks[rank]
-		if rank_cards.size() >= count and int(rank) > best_rank:
+		var grouped_cards: Array = ranks[rank]
+		if grouped_cards.size() >= count and int(rank) > best_rank:
 			best_rank = int(rank)
 
 	var scoring_cards := []
@@ -488,8 +497,8 @@ func _get_pair_cards(cards: Array, pair_count: int) -> Array:
 	var pair_ranks := []
 
 	for rank in ranks:
-		var rank_cards: Array = ranks[rank]
-		if rank_cards.size() >= 2:
+		var grouped_cards: Array = ranks[rank]
+		if grouped_cards.size() >= 2:
 			pair_ranks.append(int(rank))
 
 	pair_ranks.sort()
@@ -497,9 +506,9 @@ func _get_pair_cards(cards: Array, pair_count: int) -> Array:
 
 	var scoring_cards := []
 	for index in range(mini(pair_count, pair_ranks.size())):
-		var rank_cards: Array = ranks[pair_ranks[index]]
-		for card_index in range(mini(2, rank_cards.size())):
-			var card = rank_cards[card_index]
+		var pair_cards: Array = ranks[pair_ranks[index]]
+		for card_index in range(mini(2, pair_cards.size())):
+			var card = pair_cards[card_index]
 			if card is Dictionary:
 				scoring_cards.append(card.duplicate())
 

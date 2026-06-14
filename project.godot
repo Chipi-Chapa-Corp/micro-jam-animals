@@ -38,6 +38,10 @@ version_control/autoload_on_startup=true
 
 player=""
 
+[gui]
+
+theme/custom_font="res://assets/Schoolbell-Regular.ttf"
+
 [input]
 
 ui_accept={

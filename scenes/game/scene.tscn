@@ -1,11 +1,19 @@
 [gd_scene format=3 uid="uid://b8uhk6wgsyvr"]
 
 [ext_resource type="Script" uid="uid://dis1x4i75bhd7" path="res://scenes/game/script.gd" id="1_game"]
-[ext_resource type="PackedScene" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
-[ext_resource type="PackedScene" path="res://scenes/prey_deck/scene.tscn" id="3_prey_deck"]
-[ext_resource type="PackedScene" path="res://scenes/player_hand_deck/scene.tscn" id="4_player_hand_deck"]
-[ext_resource type="PackedScene" path="res://scenes/discard_pile/scene.tscn" id="5_discard_pile"]
-[ext_resource type="PackedScene" path="res://scenes/prey_pile/scene.tscn" id="6_prey_pile"]
+[ext_resource type="PackedScene" uid="uid://bnuyvk0l4xk3k" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
+[ext_resource type="Texture2D" uid="uid://bgvqypl6ot81j" path="res://assets/plate.png" id="3_0etgp"]
+[ext_resource type="PackedScene" uid="uid://b6egw4lxrdk82" path="res://scenes/prey_deck/scene.tscn" id="3_prey_deck"]
+[ext_resource type="PackedScene" uid="uid://c27fk577jv0vj" path="res://scenes/player_hand_deck/scene.tscn" id="4_player_hand_deck"]
+[ext_resource type="PackedScene" uid="uid://d3ae0qxjs1s5t" path="res://scenes/discard_pile/scene.tscn" id="5_discard_pile"]
+[ext_resource type="PackedScene" uid="uid://tqgi6xydf838" path="res://scenes/prey_pile/scene.tscn" id="6_prey_pile"]
+[ext_resource type="Texture2D" uid="uid://bqh31rt7tj4om" path="res://assets/ui/border-top.png" id="7_border_top"]
+[ext_resource type="Texture2D" uid="uid://blfcepiudlmgs" path="res://assets/ui/border-bottom.png" id="8_border_bottom"]
+[ext_resource type="Texture2D" uid="uid://ctd2sm7q61t02" path="res://assets/ui/border-left.png" id="9_border_left"]
+[ext_resource type="Texture2D" uid="uid://ct31bnfobgoju" path="res://assets/ui/border-right.png" id="10_border_right"]
+[ext_resource type="Texture2D" uid="uid://dibtet7a0arcn" path="res://assets/water.png" id="11_water"]
+[ext_resource type="Texture2D" uid="uid://cfywue7psuwcu" path="res://assets/land.png" id="12_land"]
+[ext_resource type="Texture2D" uid="uid://cjri1gw3rqywy" path="res://assets/air.png" id="13_air"]
 
 [node name="Game" type="Node2D" unique_id=549444923]
 script = ExtResource("1_game")
@@ -20,12 +28,40 @@ offset_bottom = 218.0
 grow_horizontal = 2
 
 [node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
+layout_mode = 2
 
-[node name="PredatorScorePanel" type="Panel" parent="UI" unique_id=748479775]
-offset_left = 24.0
+[node name="ScoreDeltaLabel" type="Label" parent="UI" unique_id=100510402]
+visible = false
+z_index = 10
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 204.0
+offset_bottom = 232.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 20
+text = "Water +0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PredatorScorePanel" type="Control" parent="UI" unique_id=748479775]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 12.0
 offset_top = 24.0
-offset_right = 214.0
-offset_bottom = 96.0
+offset_right = 233.28812
+offset_bottom = 75.0
+
+[node name="Background" type="TextureRect" parent="UI/PredatorScorePanel" unique_id=401344303]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_0etgp")
+expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="UI/PredatorScorePanel" unique_id=1342906437]
 layout_mode = 1
@@ -34,7 +70,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 21
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
@@ -46,26 +82,7 @@ theme_override_constants/separation = 6
 [node name="HandLabel" type="Label" parent="UI/PredatorScorePanel/Margin/Content" unique_id=1268386378]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Predators"
-
-[node name="SuitRows" type="VBoxContainer" parent="UI/PredatorScorePanel/Margin/Content" unique_id=896504206]
-layout_mode = 2
-theme_override_constants/separation = 3
-
-[node name="Water" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=500491219]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Water -"
-
-[node name="Land" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=123771748]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Land -"
-
-[node name="Air" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=1250181501]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Air -"
+text = "Three of a Kind 450"
 
 [node name="PlayButton" type="Button" parent="UI" unique_id=587725001]
 anchors_preset = 1
@@ -87,52 +104,112 @@ offset_top = 232.0
 offset_bottom = 435.0
 grow_horizontal = 2
 
-[node name="ScorePanel" type="Panel" parent="UI/PreyDeckContainer" unique_id=1439324890]
+[node name="ScorePanel" type="Control" parent="UI/PreyDeckContainer" unique_id=1439324890]
 layout_mode = 1
-offset_left = 24.0
+anchors_preset = 0
+offset_left = 12.0
 offset_top = 24.0
-offset_right = 214.0
-offset_bottom = 96.0
+offset_right = 233.28812
+offset_bottom = 135.0
 
-[node name="Margin" type="MarginContainer" parent="UI/PreyDeckContainer/ScorePanel" unique_id=860574788]
+[node name="HeaderPanel" type="Control" parent="UI/PreyDeckContainer/ScorePanel"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 221.28812
+offset_bottom = 51.0
+
+[node name="Background" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_0etgp")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel" unique_id=860574788]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 21
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="Content" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/Margin" unique_id=1222610090]
+[node name="Content" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel/Margin" unique_id=1222610090]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="HandLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content" unique_id=1642338590]
+[node name="HandLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel/Margin/Content" unique_id=1642338590]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Select prey"
 
-[node name="SuitRows" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content" unique_id=1970974981]
-layout_mode = 2
+[node name="SuitRows" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel" unique_id=1970974981]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 21.0
+offset_top = 57.0
+offset_right = 221.28812
+offset_bottom = 135.0
 theme_override_constants/separation = 3
 
-[node name="Water" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=4210385]
+[node name="Water" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows" unique_id=4210385]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Water -"
+theme_override_constants/separation = 8
 
-[node name="Land" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=1404261037]
+[node name="Icon" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Water" unique_id=1453385740]
+custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Land -"
+mouse_filter = 2
+texture = ExtResource("11_water")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Air" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=500415514]
+[node name="Score" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Water" unique_id=1226550194]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Air -"
+text = "0"
+
+[node name="Land" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows" unique_id=1404261037]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Land" unique_id=2017816431]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("12_land")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Score" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Land" unique_id=1548580292]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "0"
+
+[node name="Air" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows" unique_id=500415514]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Air" unique_id=897649652]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("13_air")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Score" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/Air" unique_id=2060788047]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "0"
 
 [node name="PreyDeckCenter" type="CenterContainer" parent="UI/PreyDeckContainer" unique_id=1191710009]
 layout_mode = 1
@@ -143,6 +220,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PreyDeck" parent="UI/PreyDeckContainer/PreyDeckCenter" unique_id=364789318 instance=ExtResource("3_prey_deck")]
+layout_mode = 2
 
 [node name="DiscardPile" parent="UI/PreyDeckContainer" unique_id=253470248 instance=ExtResource("5_discard_pile")]
 layout_mode = 1
@@ -165,9 +243,9 @@ offset_bottom = -1.0
 grow_horizontal = 2
 
 [node name="PlayerHandDeck" parent="UI/PlayerHandDeckContainer" unique_id=1911056388 instance=ExtResource("4_player_hand_deck")]
+layout_mode = 2
 
 [node name="PreyPile" parent="UI" unique_id=791924409 instance=ExtResource("6_prey_pile")]
-layout_mode = 3
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -189,6 +267,60 @@ offset_top = -96.0
 offset_right = 214.0
 offset_bottom = -24.0
 grow_vertical = 0
+
+[node name="BorderTop" type="TextureRect" parent="UI/HudPanel" unique_id=1724006905]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = -38.0
+offset_top = -36.0
+offset_right = 20.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("7_border_top")
+expand_mode = 1
+
+[node name="BorderBottom" type="TextureRect" parent="UI/HudPanel" unique_id=258970460]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_right = 20.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("8_border_bottom")
+expand_mode = 1
+
+[node name="BorderLeft" type="TextureRect" parent="UI/HudPanel" unique_id=446894401]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -36.0
+offset_bottom = 18.0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("9_border_left")
+expand_mode = 1
+
+[node name="BorderRight" type="TextureRect" parent="UI/HudPanel" unique_id=579345351]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -36.0
+offset_right = 20.0
+offset_bottom = 18.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("10_border_right")
+expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="UI/HudPanel" unique_id=2120364576]
 layout_mode = 1

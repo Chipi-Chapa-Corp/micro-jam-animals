@@ -26,6 +26,14 @@ func get_draw_global_position() -> Vector2:
 	return face.global_position
 
 
+func slide_in_for_round_reset() -> bool:
+	if _is_at_available_position():
+		return false
+
+	_slide_to_offset(Vector2.ZERO, true)
+	return true
+
+
 func begin_draw_animations() -> void:
 	_is_drawing_cards = true
 
@@ -44,13 +52,17 @@ func _on_player_discards_count_changed(player_discards_count: int) -> void:
 
 
 func _set_available(is_available: bool, animate: bool) -> void:
-	if _slide_tween:
-		_slide_tween.kill()
-		_slide_tween = null
-
 	var target_offset := Vector2.ZERO
 	if not is_available:
 		target_offset = _get_offscreen_offset()
+
+	_slide_to_offset(target_offset, animate)
+
+
+func _slide_to_offset(target_offset: Vector2, animate: bool) -> void:
+	if _slide_tween:
+		_slide_tween.kill()
+		_slide_tween = null
 
 	var target_shadow_position := _base_shadow_position + target_offset
 	var target_face_position := _base_face_position + target_offset
@@ -65,6 +77,13 @@ func _set_available(is_available: bool, animate: bool) -> void:
 	_slide_tween.set_ease(Tween.EASE_IN_OUT)
 	_slide_tween.tween_property(shadow, "position", target_shadow_position, SLIDE_DURATION)
 	_slide_tween.parallel().tween_property(face, "position", target_face_position, SLIDE_DURATION)
+
+
+func _is_at_available_position() -> bool:
+	return (
+		(shadow.position - _base_shadow_position).length_squared() < 0.01
+		and (face.position - _base_face_position).length_squared() < 0.01
+	)
 
 
 func _get_offscreen_offset() -> Vector2:

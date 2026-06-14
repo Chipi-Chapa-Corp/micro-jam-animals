@@ -1,24 +1,33 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://bnuyvk0l4xk3k"]
 
-[ext_resource type="Script" path="res://scenes/predator_deck/script.gd" id="1_predator_deck"]
-[ext_resource type="PackedScene" path="res://scenes/card/scene.tscn" id="2_card"]
+[ext_resource type="Script" uid="uid://dog555xw4b8cp" path="res://scenes/predator_deck/script.gd" id="1_predator_deck"]
+[ext_resource type="PackedScene" uid="uid://c8cb3uup405l" path="res://scenes/card/scene.tscn" id="2_card"]
 
-[node name="PredatorDeck" type="HBoxContainer"]
-layout_mode = 2
+[node name="PredatorDeck" type="HBoxContainer" unique_id=127539357]
 theme_override_constants/separation = 16
 script = ExtResource("1_predator_deck")
 
-[node name="Card1" parent="." instance=ExtResource("2_card")]
+[node name="Card1" parent="." unique_id=380171000 instance=ExtResource("2_card")]
 layout_mode = 2
 suit = "water"
 value = 1
 
-[node name="Card2" parent="." instance=ExtResource("2_card")]
+[node name="Card2" parent="." unique_id=1882074892 instance=ExtResource("2_card")]
 layout_mode = 2
 suit = "water"
 value = 1
 
-[node name="Card3" parent="." instance=ExtResource("2_card")]
+[node name="Card3" parent="." unique_id=1078305329 instance=ExtResource("2_card")]
+layout_mode = 2
+suit = "water"
+value = 1
+
+[node name="Card4" parent="." unique_id=677123625 instance=ExtResource("2_card")]
+layout_mode = 2
+suit = "water"
+value = 1
+
+[node name="Card5" parent="." unique_id=1833801770 instance=ExtResource("2_card")]
 layout_mode = 2
 suit = "water"
 value = 1
@@ -26,3 +35,5 @@ value = 1
 [editable path="Card1"]
 [editable path="Card2"]
 [editable path="Card3"]
+[editable path="Card4"]
+[editable path="Card5"]

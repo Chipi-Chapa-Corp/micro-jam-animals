@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://b4rfvjujkm28u"]
 
-[ext_resource type="Script" path="res://scenes/game-over/script.gd" id="1_game_over"]
+[ext_resource type="Script" uid="uid://fmbdvd78b4hk" path="res://scenes/game-over/script.gd" id="1_game_over"]
 
-[node name="GameOver" type="Control"]
+[node name="GameOver" type="Control" unique_id=2041823300]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +11,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_game_over")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=18355571]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -20,7 +20,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.05, 0.05, 0.06, 1)
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=528482417]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -28,20 +28,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Menu" type="VBoxContainer" parent="CenterContainer"]
+[node name="Menu" type="VBoxContainer" parent="CenterContainer" unique_id=1755148105]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="CenterContainer/Menu"]
+[node name="Title" type="Label" parent="CenterContainer/Menu" unique_id=2120744552]
 layout_mode = 2
 text = "Game Over"
 horizontal_alignment = 1
 
-[node name="Restart" type="Button" parent="CenterContainer/Menu"]
+[node name="Restart" type="Button" parent="CenterContainer/Menu" unique_id=492775660]
 layout_mode = 2
 text = "Restart"
 
-[node name="MainMenu" type="Button" parent="CenterContainer/Menu"]
+[node name="MainMenu" type="Button" parent="CenterContainer/Menu" unique_id=343480368]
 layout_mode = 2
 text = "Main Menu"
 

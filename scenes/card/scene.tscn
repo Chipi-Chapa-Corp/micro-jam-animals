@@ -1,8 +1,8 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://c8cb3uup405l"]
 
-[ext_resource type="Script" path="res://scenes/card/script.gd" id="1_card"]
-[ext_resource type="Texture2D" path="res://assets/prey_air_4.png" id="2_card_art"]
-[ext_resource type="Script" path="res://scenes/card/radial_gradient.gd" id="3_radial_gradient"]
+[ext_resource type="Script" uid="uid://ba54nxkkse51f" path="res://scenes/card/script.gd" id="1_card"]
+[ext_resource type="Texture2D" uid="uid://cevv52brfyowq" path="res://assets/prey_air_4.png" id="2_card_art"]
+[ext_resource type="Script" uid="uid://c7oaraoegy805" path="res://scenes/card/radial_gradient.gd" id="3_radial_gradient"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0, 0, 0, 1)
@@ -44,7 +44,7 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[node name="Card" type="Control"]
+[node name="Card" type="Control" unique_id=317375343]
 custom_minimum_size = Vector2(110, 154)
 layout_mode = 3
 anchors_preset = 0
@@ -52,7 +52,7 @@ offset_right = 110.0
 offset_bottom = 154.0
 script = ExtResource("1_card")
 
-[node name="Shadow" type="Panel" parent="."]
+[node name="Shadow" type="Panel" parent="." unique_id=385211440]
 modulate = Color(0, 0, 0, 0)
 layout_mode = 1
 anchors_preset = 15
@@ -63,7 +63,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_shadow")
 
-[node name="Face" type="Panel" parent="."]
+[node name="Face" type="Panel" parent="." unique_id=809110284]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -73,32 +73,9 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_face")
 
-[node name="Back" type="Panel" parent="."]
-visible = false
+[node name="Color" type="Panel" parent="Face" unique_id=1145937550]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_back")
-
-[node name="Color" type="Panel" parent="Back"]
-layout_mode = 1
-anchors_preset = 15
-anchor_left = 0.023
-anchor_top = 0.016
-anchor_right = 0.977
-anchor_bottom = 0.984
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_back_color")
-
-[node name="Color" type="Panel" parent="Face"]
-layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_left = 0.023
 anchor_top = 0.016
 anchor_right = 0.977
@@ -108,10 +85,9 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_color")
 
-[node name="PredatorGradient" type="Control" parent="Face"]
+[node name="PredatorGradient" type="Control" parent="Face" unique_id=627195609]
 visible = false
 layout_mode = 1
-anchors_preset = 15
 anchor_left = 0.023
 anchor_top = 0.016
 anchor_right = 0.977
@@ -121,7 +97,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("3_radial_gradient")
 
-[node name="Art" type="TextureRect" parent="Face"]
+[node name="Art" type="TextureRect" parent="Face" unique_id=1227471146]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.18
@@ -135,22 +111,7 @@ texture = ExtResource("2_card_art")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BottomArt" type="TextureRect" parent="Face"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.18
-anchor_top = 0.53
-anchor_right = 0.82
-anchor_bottom = 0.75
-grow_horizontal = 2
-grow_vertical = 2
-rotation = 3.14159
-mouse_filter = 2
-texture = ExtResource("2_card_art")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="TopValue" type="Label" parent="Face"]
+[node name="TopValue" type="Label" parent="Face" unique_id=813651340]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.717
@@ -159,14 +120,13 @@ anchor_right = 0.937
 anchor_bottom = 0.156
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 text = "4"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="TopSuit" type="TextureRect" parent="Face"]
+[node name="TopSuit" type="TextureRect" parent="Face" unique_id=1585257035]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.815
@@ -180,7 +140,7 @@ texture = ExtResource("2_card_art")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BottomValue" type="Label" parent="Face"]
+[node name="BottomValue" type="Label" parent="Face" unique_id=1628428615]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.072
@@ -191,14 +151,13 @@ grow_horizontal = 2
 grow_vertical = 2
 rotation = 3.14159
 pivot_offset = Vector2(12.1, 12.3)
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 text = "4"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="BottomSuit" type="TextureRect" parent="Face"]
+[node name="BottomSuit" type="TextureRect" parent="Face" unique_id=1566801246]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.072
@@ -213,3 +172,26 @@ mouse_filter = 2
 texture = ExtResource("2_card_art")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="Back" type="Panel" parent="." unique_id=2103308832]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_back")
+
+[node name="Color" type="Panel" parent="Back" unique_id=127985866]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.023
+anchor_top = 0.016
+anchor_right = 0.977
+anchor_bottom = 0.984
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_back_color")
