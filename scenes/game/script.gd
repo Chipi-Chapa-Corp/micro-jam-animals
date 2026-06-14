@@ -66,7 +66,13 @@ func _animate_card_move(
 		target_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var moving_card := CARD_SCENE.instantiate() as CardScene
-	moving_card.configure(CARD_KIND, str(card.get("suit", "")), int(card.get("value", 0)))
+	moving_card.configure(
+		CARD_KIND,
+		str(card.get("suit", "")),
+		int(card.get("value", 0)),
+		float(card.get("scale", moving_card.art_scale)),
+		float(card.get("rotation", moving_card.art_rotation_degrees))
+	)
 	moving_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_add_moving_card(moving_card, target_deck, target_card)
 	moving_card.pivot_offset = moving_card.size * 0.5

@@ -6,6 +6,8 @@ signal clicked(card_id: String)
 @export var kind: String = "prey"
 @export var suit: String = "air"
 @export var value: int = 4
+@export var art_scale: float = CARD_ART_SCALE
+@export var art_rotation_degrees: float = 0.0
 
 const HOVER_ELEVATION: Vector2 = Vector2(0.0, -7.0)
 const HOVER_SCALE: Vector2 = Vector2(1.035, 1.035)
@@ -28,7 +30,7 @@ const LAND_COLOR: Color = Color(126.0 / 255.0, 160.0 / 255.0, 118.0 / 255.0)
 const AIR_COLOR: Color = Color(171.0 / 255.0, 177.0 / 255.0, 188.0 / 255.0)
 const CARD_ART_CENTER: Vector2 = Vector2(55.0, 77.0)
 const CARD_ART_SIZE: Vector2 = Vector2(75.0, 80.0)
-const CARD_ART_SCALE: float = 1.5
+const CARD_ART_SCALE: float = 1.4
 
 var id: String:
 	get:
@@ -71,10 +73,18 @@ func _gui_input(event: InputEvent) -> void:
 		accept_event()
 
 
-func configure(next_kind: String, next_suit: String, next_value: int) -> void:
+func configure(
+	next_kind: String,
+	next_suit: String,
+	next_value: int,
+	next_art_scale: float = CARD_ART_SCALE,
+	next_art_rotation_degrees: float = 0.0
+) -> void:
 	kind = next_kind
 	suit = next_suit
 	value = next_value
+	art_scale = next_art_scale
+	art_rotation_degrees = next_art_rotation_degrees
 	_refresh_art()
 
 
@@ -157,8 +167,8 @@ func _refresh_suit_color() -> void:
 
 
 func _refresh_art_layout() -> void:
-	_set_control_rect(art, CARD_ART_CENTER, CARD_ART_SIZE, CARD_ART_SCALE)
-	art.rotation = 0.0
+	_set_control_rect(art, CARD_ART_CENTER, CARD_ART_SIZE, art_scale)
+	art.rotation_degrees = art_rotation_degrees
 	bottom_art.visible = false
 	_sync_pivots()
 

@@ -66,7 +66,13 @@ func get_card_by_id(card_id: String) -> CardScene:
 
 func _add_card(player_card: Dictionary, hand_index: int) -> void:
 	var card := CARD_SCENE.instantiate() as CardScene
-	card.configure(CARD_KIND, str(player_card.get("suit", "")), int(player_card.get("value", 0)))
+	card.configure(
+		CARD_KIND,
+		str(player_card.get("suit", "")),
+		int(player_card.get("value", 0)),
+		float(player_card.get("scale", card.art_scale)),
+		float(player_card.get("rotation", card.art_rotation_degrees))
+	)
 	card.set_meta(HAND_INDEX_META, hand_index)
 	card.clicked.connect(_on_card_clicked)
 	add_child(card)

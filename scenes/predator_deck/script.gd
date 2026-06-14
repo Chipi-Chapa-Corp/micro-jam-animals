@@ -23,7 +23,13 @@ func render_cards() -> void:
 func _add_card(predator: Dictionary) -> void:
 	print("PredatorDeck instantiating card: ", predator)
 	var card := CARD_SCENE.instantiate() as CardScene
-	card.configure(CARD_KIND, str(predator.get("suit", "")), int(predator.get("value", 0)))
+	card.configure(
+		CARD_KIND,
+		str(predator.get("suit", "")),
+		int(predator.get("value", 0)),
+		float(predator.get("scale", card.art_scale)),
+		float(predator.get("rotation", card.art_rotation_degrees))
+	)
 	add_child(card)
 
 

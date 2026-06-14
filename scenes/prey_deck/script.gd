@@ -60,7 +60,13 @@ func get_card_by_id(card_id: String) -> CardScene:
 func _add_card(prey_card: Dictionary, table_index: int) -> void:
 	print("PreyDeck instantiating card: ", prey_card)
 	var card := CARD_SCENE.instantiate() as CardScene
-	card.configure(CARD_KIND, str(prey_card.get("suit", "")), int(prey_card.get("value", 0)))
+	card.configure(
+		CARD_KIND,
+		str(prey_card.get("suit", "")),
+		int(prey_card.get("value", 0)),
+		float(prey_card.get("scale", card.art_scale)),
+		float(prey_card.get("rotation", card.art_rotation_degrees))
+	)
 	card.set_meta(TABLE_INDEX_META, table_index)
 	card.clicked.connect(_on_card_clicked)
 	add_child(card)

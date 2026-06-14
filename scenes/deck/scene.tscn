@@ -1,0 +1,84 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/deck/script.gd" id="1_deck"]
+
+[node name="Deck" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_deck")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.07, 0.06, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = -40.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="MarginContainer/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Deck"
+vertical_alignment = 1
+
+[node name="Back" type="Button" parent="MarginContainer/Content/Header"]
+layout_mode = 2
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Cards" type="VBoxContainer" parent="MarginContainer/Content/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="PreyTitle" type="Label" parent="MarginContainer/Content/ScrollContainer/Cards"]
+layout_mode = 2
+text = "Prey"
+
+[node name="PreyGrid" type="GridContainer" parent="MarginContainer/Content/ScrollContainer/Cards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+columns = 6
+
+[node name="PredatorTitle" type="Label" parent="MarginContainer/Content/ScrollContainer/Cards"]
+layout_mode = 2
+text = "Predators"
+
+[node name="PredatorGrid" type="GridContainer" parent="MarginContainer/Content/ScrollContainer/Cards"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+columns = 6
+
+[connection signal="pressed" from="MarginContainer/Content/Header/Back" to="." method="_on_back_pressed"]

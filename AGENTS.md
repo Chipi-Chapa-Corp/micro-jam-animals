@@ -27,6 +27,16 @@ Note: this is overview of the game, not a single task
   we go to next round. total points are getting player score regardless
 - game finishes when player is bitten to death by predators
 
+## Prey Twist
+
+- Suits matter more than just for hand. Air gets away easier from land, land
+  from water and water from air.
+- When calculating scores, each prey is modified by each predator: accumulative
+  buff against easier suits, debuff against another suit, and no change against
+  same suit.
+- Outcome: player has to not to just build a strong hand, but to account for
+  suit matching.
+
 # Assistant requirements
 
 - Don't run godot validations
