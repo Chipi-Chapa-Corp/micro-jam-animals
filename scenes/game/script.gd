@@ -39,8 +39,8 @@ const SCORE_SUIT_COLORS: Dictionary = {
 @onready var score_panel: Control = $UI/PreyDeckContainer/ScorePanel
 @onready var hand_label: Label = $UI/PreyDeckContainer/ScorePanel/HeaderPanel/Margin/Content/HandLabel
 @onready var suit_rows: VBoxContainer = $UI/PreyDeckContainer/ScorePanel/SuitRows
-@onready var score_gain_row: Control = $UI/PreyDeckContainer/ScorePanel/ScoreGainRow
-@onready var score_gain_label: Label = $UI/PreyDeckContainer/ScorePanel/ScoreGainRow/ScoreGainLabel
+@onready var score_gain_row: HBoxContainer = $UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow
+@onready var score_gain_label: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow/ScoreGainLabel
 @onready var water_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Water/Score
 @onready var land_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Land/Score
 @onready var air_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Air/Score
@@ -166,8 +166,8 @@ func _reveal_score_result(result: Dictionary) -> void:
 	predator_score_panel.visible = true
 	_refresh_prey_hand_preview(result)
 	_refresh_predator_score_preview(result)
-	_reset_score_rows(result)
-	_set_score_gain_visible(false)
+	_reset_score_rows(result, true)
+	_set_score_gain_visible(true, 0.0)
 	score_delta_label.visible = false
 	await _show_score_rows()
 	await _reveal_prey_score_steps(result)
@@ -191,11 +191,9 @@ func _refresh_predator_raw_preview() -> void:
 	_set_predator_total_score(result, false)
 
 
-func _reset_score_rows(result: Dictionary) -> void:
-	var suits: Dictionary = result.get("suits", {})
+func _reset_score_rows(_result: Dictionary, should_show: bool = false) -> void:
 	for suit in SUIT_ORDER:
-		var suit_result: Dictionary = suits.get(suit, {})
-		_set_prey_suit_score(suit, 0.0, int(suit_result.get("prey_count", 0)) > 0)
+		_set_prey_suit_score(suit, 0.0, should_show)
 
 
 func _show_score_rows() -> void:
@@ -224,6 +222,7 @@ func _reveal_prey_score_steps(result: Dictionary) -> void:
 		var card_id := str(step.get("id", ""))
 		await _pulse_prey_card(card_id)
 		_set_prey_suit_score(suit, float(step.get("score_after", 0.0)), true)
+		_set_score_gain_visible(true, _get_visible_prey_score_total())
 		_show_score_change_label(suit, float(step.get("amount", 0.0)))
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
@@ -241,7 +240,7 @@ func _reveal_hand_multiplier_step(result: Dictionary) -> void:
 
 		_set_prey_suit_score(suit, float(suit_result.get("prey_score", 0.0)), true)
 
-	_set_score_gain_visible(true, float(result.get("score_gain", 0.0)))
+	_set_score_gain_visible(true, _get_visible_prey_score_total())
 	await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
 
@@ -257,6 +256,7 @@ func _reveal_suit_matchup_steps(result: Dictionary) -> void:
 		var prey_matchup_score := float(suit_result.get("prey_matchup_score", 0.0))
 		var matchup_amount := prey_matchup_score - base_prey_score
 		_set_prey_suit_score(suit, prey_matchup_score, true)
+		_set_score_gain_visible(true, _get_visible_prey_score_total())
 		_show_score_change_label(suit, matchup_amount)
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
@@ -274,6 +274,15 @@ func _set_score_gain_visible(should_show: bool, score: float = 0.0) -> void:
 		return
 
 	score_gain_label.text = "Score +%s" % _format_score(score)
+
+
+func _get_visible_prey_score_total() -> float:
+	var total := 0.0
+	for suit in SUIT_ORDER:
+		if _prey_suit_scores.has(suit):
+			total += float(_prey_suit_scores[suit])
+
+	return total
 
 
 func _refresh_predator_score_preview(result: Dictionary) -> void:

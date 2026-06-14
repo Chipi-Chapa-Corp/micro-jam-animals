@@ -162,7 +162,7 @@ anchors_preset = 0
 offset_left = 21.0
 offset_top = 57.0
 offset_right = 221.28812
-offset_bottom = 135.0
+offset_bottom = 160.0
 theme_override_constants/separation = 3
 
 [node name="Water" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows" unique_id=4210385]
@@ -216,30 +216,23 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="ScoreGainRow" type="Control" parent="UI/PreyDeckContainer/ScorePanel"]
+[node name="ScoreGainRow" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows"]
 visible = false
-layout_mode = 1
-anchors_preset = 0
-offset_left = 21.0
-offset_top = 138.0
-offset_right = 221.28812
-offset_bottom = 160.0
+layout_mode = 2
+theme_override_constants/separation = 6
 
-[node name="Line" type="ColorRect" parent="UI/PreyDeckContainer/ScorePanel/ScoreGainRow"]
-layout_mode = 1
-anchors_preset = 0
-offset_top = 11.0
-offset_right = 82.0
-offset_bottom = 12.0
+[node name="LineCenter" type="CenterContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow"]
+custom_minimum_size = Vector2(82, 0)
+layout_mode = 2
+
+[node name="Line" type="ColorRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow/LineCenter"]
+custom_minimum_size = Vector2(82, 1)
+layout_mode = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.65)
 
-[node name="ScoreGainLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/ScoreGainRow"]
-layout_mode = 1
-anchors_preset = 0
-offset_left = 92.0
-offset_right = 200.0
-offset_bottom = 22.0
+[node name="ScoreGainLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Score +0"
 
