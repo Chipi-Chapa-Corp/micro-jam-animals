@@ -161,6 +161,59 @@ func tween_discard_to(
 	return move_tween
 
 
+func prepare_draw_from_pile(target_z_index: int) -> void:
+	if _hover_tween:
+		_hover_tween.kill()
+	if _shake_tween:
+		_shake_tween.kill()
+
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pivot_offset = size * 0.5
+	z_index = target_z_index
+	rotation_degrees = 0.0
+	face.position = _base_face_position
+	face.rotation_degrees = 0.0
+	shadow.position = _base_shadow_position
+	shadow.scale = Vector2.ONE
+	shadow.modulate = BASE_SHADOW_MODULATE
+	modulate = Color.WHITE
+	_show_back()
+	back.scale = Vector2.ONE
+	face.scale = Vector2(-FLIP_EDGE_SCALE_X, 1.0)
+
+
+func tween_draw_to(
+	target_global_position: Vector2,
+	target_rotation_degrees: float,
+	target_z_index: int,
+	move_duration: float,
+	flip_duration: float
+) -> Tween:
+	if _hover_tween:
+		_hover_tween.kill()
+	if _shake_tween:
+		_shake_tween.kill()
+
+	prepare_draw_from_pile(target_z_index)
+
+	var move_tween := create_tween()
+	move_tween.set_trans(Tween.TRANS_CUBIC)
+	move_tween.set_ease(Tween.EASE_IN_OUT)
+	move_tween.tween_property(self, "global_position", target_global_position, move_duration)
+	move_tween.parallel().tween_property(
+		self, "rotation_degrees", target_rotation_degrees, move_duration
+	)
+
+	var flip_tween := create_tween()
+	flip_tween.set_trans(Tween.TRANS_SINE)
+	flip_tween.set_ease(Tween.EASE_IN_OUT)
+	flip_tween.tween_property(back, "scale", Vector2(-FLIP_EDGE_SCALE_X, 1.0), flip_duration * 0.44)
+	flip_tween.tween_callback(Callable(self, "_show_front_from_draw"))
+	flip_tween.tween_property(face, "scale", Vector2.ONE, flip_duration * 0.56)
+
+	return move_tween
+
+
 func _refresh_art() -> void:
 	if not is_node_ready():
 		return
@@ -319,6 +372,12 @@ func _show_front() -> void:
 func _show_back() -> void:
 	face.visible = false
 	back.visible = true
+
+
+func _show_front_from_draw() -> void:
+	face.visible = true
+	face.scale = Vector2(-FLIP_EDGE_SCALE_X, 1.0)
+	back.visible = false
 
 
 func _get_pickup_tilt_degrees() -> float:

@@ -12,8 +12,8 @@ const DEFAULT_SCORE: int = 0
 const DEFAULT_HEALTH: int = 100
 const DEFAULT_ROUND: int = 0
 const RANDOM_PREDATOR_HAND_COUNT: int = -1
-const DEFAULT_PLAYER_HAND_COUNT: int = 10
-const DEFAULT_PLAYER_DISCARDS_COUNT: int = 1
+const DEFAULT_PLAYER_HAND_COUNT: int = 8
+const DEFAULT_PLAYER_DISCARDS_COUNT: int = 2
 const MAX_PLAYER_TABLE_CARDS: int = 5
 const MAX_PLAYER_DISCARD_CARDS: int = MAX_PLAYER_TABLE_CARDS
 const ERROR_PLAYER_TABLE_FULL: String = "player_table_full"
@@ -186,10 +186,11 @@ func discard_cards(card_ids: Array) -> Array:
 	var next_player_hand := get_player_hand()
 	next_player_hand.append_array(new_cards)
 	set_player_hand(next_player_hand)
-	_set_player_discards_count(_player_discards_count - 1)
+	var next_player_discards_count := _player_discards_count - 1
 	player_cards_discarded.emit(
-		_duplicate_cards(discarded_cards), _duplicate_cards(new_cards), _player_discards_count
+		_duplicate_cards(discarded_cards), _duplicate_cards(new_cards), next_player_discards_count
 	)
+	_set_player_discards_count(next_player_discards_count)
 	return _duplicate_cards(new_cards)
 
 

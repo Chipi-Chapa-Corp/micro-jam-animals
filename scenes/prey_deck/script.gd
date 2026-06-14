@@ -12,6 +12,7 @@ const DISCARD_PULL_OFFSET: Vector2 = Vector2(-92.0, 0.0)
 const DISCARD_HOVER_DURATION: float = 0.16
 const DISCARD_MOVE_DURATION: float = 0.58
 const DISCARD_FLIP_DURATION: float = 0.24
+const DISCARD_STAGGER_DURATION: float = 0.08
 const SHIFT_DURATION: float = 0.14
 const TABLE_INDEX_META: String = "prey_deck_index"
 
@@ -119,6 +120,9 @@ func move_cards_to_discard(discard_global_position: Vector2) -> void:
 			DISCARD_MOVE_DURATION,
 			DISCARD_FLIP_DURATION
 		)
+
+		if index < discard_cards.size() - 1:
+			await get_tree().create_timer(DISCARD_STAGGER_DURATION).timeout
 
 	if move_tween:
 		await move_tween.finished

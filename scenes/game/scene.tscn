@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://b8uhk6wgsyvr"]
+[gd_scene load_steps=7 format=3 uid="uid://b8uhk6wgsyvr"]
 
 [ext_resource type="Script" uid="uid://dis1x4i75bhd7" path="res://scenes/game/script.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
 [ext_resource type="PackedScene" path="res://scenes/prey_deck/scene.tscn" id="3_prey_deck"]
 [ext_resource type="PackedScene" path="res://scenes/player_hand_deck/scene.tscn" id="4_player_hand_deck"]
 [ext_resource type="PackedScene" path="res://scenes/discard_pile/scene.tscn" id="5_discard_pile"]
+[ext_resource type="PackedScene" path="res://scenes/prey_pile/scene.tscn" id="6_prey_pile"]
 
 [node name="Game" type="Node2D" unique_id=549444923]
 script = ExtResource("1_game")
@@ -55,6 +56,20 @@ offset_bottom = -1.0
 grow_horizontal = 2
 
 [node name="PlayerHandDeck" parent="UI/PlayerHandDeckContainer" unique_id=1911056388 instance=ExtResource("4_player_hand_deck")]
+
+[node name="PreyPile" parent="UI" instance=ExtResource("6_prey_pile")]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -134.0
+offset_top = -178.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
 
 [node name="CardAnimationLayer" type="Control" parent="UI" unique_id=430342872]
 layout_mode = 3
