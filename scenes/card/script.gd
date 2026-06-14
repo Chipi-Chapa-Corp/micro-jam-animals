@@ -19,6 +19,8 @@ const PICKUP_TILT_DEGREES: float = 3.0
 const PICKUP_DURATION: float = 0.08
 const ALIGN_DURATION: float = 0.11
 const LOWER_DURATION: float = 0.12
+const HIGHLIGHT_DURATION: float = 0.1
+const HIGHLIGHT_HOLD_DURATION: float = 0.12
 const SHAKE_OFFSET: Vector2 = Vector2(7.0, 0.0)
 const SHAKE_DURATION: float = 0.035
 const FLIP_EDGE_SCALE_X: float = 0.18
@@ -124,6 +126,31 @@ func shake_feedback() -> void:
 	)
 	_shake_tween.tween_property(face, "position", face_start_position, SHAKE_DURATION)
 	_shake_tween.parallel().tween_property(shadow, "position", shadow_start_position, SHAKE_DURATION)
+
+
+func pulse_highlight(hold_duration: float = HIGHLIGHT_HOLD_DURATION) -> void:
+	if _hover_tween:
+		_hover_tween.kill()
+	if _shake_tween:
+		_shake_tween.kill()
+
+	_hover_tween = create_tween()
+	_hover_tween.set_trans(Tween.TRANS_SINE)
+	_hover_tween.set_ease(Tween.EASE_OUT)
+	_hover_tween.tween_property(face, "position", _base_face_position + HOVER_ELEVATION, HIGHLIGHT_DURATION)
+	_hover_tween.parallel().tween_property(face, "scale", HOVER_SCALE, HIGHLIGHT_DURATION)
+	_hover_tween.parallel().tween_property(
+		shadow, "position", _base_shadow_position + HOVER_SHADOW_OFFSET, HIGHLIGHT_DURATION
+	)
+	_hover_tween.parallel().tween_property(shadow, "scale", HOVER_SHADOW_SCALE, HIGHLIGHT_DURATION)
+	_hover_tween.parallel().tween_property(shadow, "modulate", HOVER_SHADOW_MODULATE, HIGHLIGHT_DURATION)
+	await _hover_tween.finished
+
+	if hold_duration > 0.0:
+		await get_tree().create_timer(hold_duration).timeout
+
+	_tween_lower()
+	await _hover_tween.finished
 
 
 func tween_discard_to(

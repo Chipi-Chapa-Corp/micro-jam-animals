@@ -6,6 +6,7 @@ const CARD_KIND: String = "predator"
 
 
 func _ready() -> void:
+	GameState.predators_changed.connect(_on_predators_changed)
 	render_cards()
 
 
@@ -18,6 +19,15 @@ func render_cards() -> void:
 	for predator in predators:
 		if predator is Dictionary:
 			_add_card(predator)
+
+
+func get_card_by_id(card_id: String) -> CardScene:
+	for child in get_children():
+		var card := child as CardScene
+		if card and card.id == card_id:
+			return card
+
+	return null
 
 
 func _add_card(predator: Dictionary) -> void:
@@ -37,3 +47,7 @@ func _clear_cards() -> void:
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
+
+
+func _on_predators_changed(_predators: Array) -> void:
+	render_cards()

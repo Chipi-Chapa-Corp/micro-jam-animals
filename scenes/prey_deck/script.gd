@@ -17,6 +17,7 @@ const SHIFT_DURATION: float = 0.14
 const TABLE_INDEX_META: String = "prey_deck_index"
 
 var _has_rendered_cards: bool = false
+var _is_available: bool = true
 var _is_discard_hovered: bool = false
 var _is_discard_animating: bool = false
 var _layout_tween: Tween
@@ -63,6 +64,14 @@ func get_card_by_id(card_id: String) -> CardScene:
 			return card
 
 	return null
+
+
+func set_cards_available(is_available: bool) -> void:
+	_is_available = is_available
+	for child in get_children():
+		var card := child as CardScene
+		if card:
+			card.mouse_filter = Control.MOUSE_FILTER_STOP if _is_available else Control.MOUSE_FILTER_IGNORE
 
 
 func set_discard_hovered(is_hovered: bool) -> void:
@@ -143,6 +152,7 @@ func _add_card(prey_card: Dictionary, table_index: int) -> void:
 		float(prey_card.get("rotation", card.art_rotation_degrees))
 	)
 	card.set_meta(TABLE_INDEX_META, table_index)
+	card.mouse_filter = Control.MOUSE_FILTER_STOP if _is_available else Control.MOUSE_FILTER_IGNORE
 	card.clicked.connect(_on_card_clicked)
 	add_child(card)
 
@@ -283,6 +293,9 @@ func _on_player_table_changed(_player_table: Array) -> void:
 
 
 func _on_card_clicked(card_id: String) -> void:
+	if not _is_available:
+		return
+
 	var source_card := get_card_by_id(card_id)
 	if not source_card:
 		return

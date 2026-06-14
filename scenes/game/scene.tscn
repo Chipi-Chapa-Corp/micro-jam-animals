@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://b8uhk6wgsyvr"]
+[gd_scene format=3 uid="uid://b8uhk6wgsyvr"]
 
 [ext_resource type="Script" uid="uid://dis1x4i75bhd7" path="res://scenes/game/script.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://scenes/predator_deck/scene.tscn" id="2_tepwh"]
@@ -21,14 +21,120 @@ grow_horizontal = 2
 
 [node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
 
+[node name="PredatorScorePanel" type="Panel" parent="UI" unique_id=748479775]
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 214.0
+offset_bottom = 96.0
+
+[node name="Margin" type="MarginContainer" parent="UI/PredatorScorePanel" unique_id=1342906437]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="UI/PredatorScorePanel/Margin" unique_id=646850393]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HandLabel" type="Label" parent="UI/PredatorScorePanel/Margin/Content" unique_id=1268386378]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Predators"
+
+[node name="SuitRows" type="VBoxContainer" parent="UI/PredatorScorePanel/Margin/Content" unique_id=896504206]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Water" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=500491219]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Water -"
+
+[node name="Land" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=123771748]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Land -"
+
+[node name="Air" type="Label" parent="UI/PredatorScorePanel/Margin/Content/SuitRows" unique_id=1250181501]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Air -"
+
+[node name="PlayButton" type="Button" parent="UI" unique_id=587725001]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -154.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 72.0
+grow_horizontal = 0
+disabled = true
+text = "Play"
+
 [node name="PreyDeckContainer" type="Control" parent="UI" unique_id=85535659]
+layout_mode = 3
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 232.0
 offset_bottom = 435.0
 grow_horizontal = 2
 
-[node name="PreyDeckCenter" type="CenterContainer" parent="UI/PreyDeckContainer"]
+[node name="ScorePanel" type="Panel" parent="UI/PreyDeckContainer" unique_id=1439324890]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 214.0
+offset_bottom = 96.0
+
+[node name="Margin" type="MarginContainer" parent="UI/PreyDeckContainer/ScorePanel" unique_id=860574788]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/Margin" unique_id=1222610090]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HandLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content" unique_id=1642338590]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Select prey"
+
+[node name="SuitRows" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content" unique_id=1970974981]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Water" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=4210385]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Water -"
+
+[node name="Land" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=1404261037]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Land -"
+
+[node name="Air" type="Label" parent="UI/PreyDeckContainer/ScorePanel/Margin/Content/SuitRows" unique_id=500415514]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Air -"
+
+[node name="PreyDeckCenter" type="CenterContainer" parent="UI/PreyDeckContainer" unique_id=1191710009]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,10 +143,10 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PreyDeck" parent="UI/PreyDeckContainer/PreyDeckCenter" unique_id=364789318 instance=ExtResource("3_prey_deck")]
-layout_mode = 2
 
-[node name="DiscardPile" parent="UI/PreyDeckContainer" instance=ExtResource("5_discard_pile")]
+[node name="DiscardPile" parent="UI/PreyDeckContainer" unique_id=253470248 instance=ExtResource("5_discard_pile")]
 layout_mode = 1
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -134.0
@@ -60,9 +166,9 @@ grow_horizontal = 2
 
 [node name="PlayerHandDeck" parent="UI/PlayerHandDeckContainer" unique_id=1911056388 instance=ExtResource("4_player_hand_deck")]
 
-[node name="PreyPile" parent="UI" instance=ExtResource("6_prey_pile")]
-layout_mode = 1
-anchors_preset = 8
+[node name="PreyPile" parent="UI" unique_id=791924409 instance=ExtResource("6_prey_pile")]
+layout_mode = 3
+anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -73,6 +179,42 @@ offset_right = -24.0
 offset_bottom = -24.0
 grow_horizontal = 0
 grow_vertical = 0
+
+[node name="HudPanel" type="Panel" parent="UI" unique_id=1411787925]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -96.0
+offset_right = 214.0
+offset_bottom = -24.0
+grow_vertical = 0
+
+[node name="Margin" type="MarginContainer" parent="UI/HudPanel" unique_id=2120364576]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="UI/HudPanel/Margin" unique_id=1037980984]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HealthLabel" type="Label" parent="UI/HudPanel/Margin/Content" unique_id=253577740]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "HP 100"
+
+[node name="ScoreLabel" type="Label" parent="UI/HudPanel/Margin/Content" unique_id=548351494]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Score 0"
 
 [node name="CardAnimationLayer" type="Control" parent="UI" unique_id=430342872]
 layout_mode = 3

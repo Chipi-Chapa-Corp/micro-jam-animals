@@ -14,6 +14,7 @@ const SHIFT_DURATION: float = 0.14
 const HAND_INDEX_META: String = "player_hand_index"
 
 var _has_rendered_cards: bool = false
+var _is_available: bool = true
 var _layout_tween: Tween
 
 
@@ -64,6 +65,14 @@ func get_card_by_id(card_id: String) -> CardScene:
 	return null
 
 
+func set_cards_available(is_available: bool) -> void:
+	_is_available = is_available
+	for child in get_children():
+		var card := child as CardScene
+		if card:
+			card.mouse_filter = Control.MOUSE_FILTER_STOP if _is_available else Control.MOUSE_FILTER_IGNORE
+
+
 func _add_card(player_card: Dictionary, hand_index: int) -> void:
 	var card := CARD_SCENE.instantiate() as CardScene
 	card.configure(
@@ -74,6 +83,7 @@ func _add_card(player_card: Dictionary, hand_index: int) -> void:
 		float(player_card.get("rotation", card.art_rotation_degrees))
 	)
 	card.set_meta(HAND_INDEX_META, hand_index)
+	card.mouse_filter = Control.MOUSE_FILTER_STOP if _is_available else Control.MOUSE_FILTER_IGNORE
 	card.clicked.connect(_on_card_clicked)
 	add_child(card)
 
@@ -186,6 +196,9 @@ func _get_player_card_id(player_card: Dictionary) -> String:
 
 
 func _on_card_clicked(card_id: String) -> void:
+	if not _is_available:
+		return
+
 	var source_card := get_card_by_id(card_id)
 	if not source_card:
 		return
