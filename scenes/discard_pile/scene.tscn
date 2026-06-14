@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d3ae0qxjs1s5t"]
 
 [ext_resource type="Script" uid="uid://d3dc7n8j2pn65" path="res://scenes/discard_pile/script.gd" id="1_discard_pile"]
+[ext_resource type="Texture2D" uid="uid://cwcvgafocw5y0" path="res://assets/back.png" id="2_back"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0, 0, 0, 0.18)
@@ -9,13 +10,13 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_face"]
-bg_color = Color(0.22, 0.235, 0.23, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.46, 0.49, 0.47, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_edge"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.17, 0.165, 0.65)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -43,7 +44,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_shadow")
 
-[node name="Face" type="Panel" parent="." unique_id=7260010]
+[node name="Face" type="Control" parent="." unique_id=7260010]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -51,17 +52,142 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_face")
 
-[node name="Label" type="Label" parent="Face" unique_id=1986675710]
+[node name="BackBase" type="TextureRect" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 16.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Edge" type="Panel" parent="Face/BackBase"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_edge")
+
+[node name="BackLower" type="TextureRect" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Edge" type="Panel" parent="Face/BackLower"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_edge")
+
+[node name="BackBottom" type="TextureRect" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 8.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Edge" type="Panel" parent="Face/BackBottom"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_edge")
+
+[node name="BackMiddle" type="TextureRect" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 4.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Edge" type="Panel" parent="Face/BackMiddle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_edge")
+
+[node name="BackTop" type="TextureRect" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_back")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Edge" type="Panel" parent="Face/BackTop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_edge")
+
+[node name="Label" type="Label" parent="Face" unique_id=1986675710]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = -29.0
+offset_bottom = -1.0
+grow_horizontal = 2
 theme_override_colors/font_color = Color(0.88, 0.91, 0.88, 1)
 theme_override_font_sizes/font_size = 18
-text = "Discard"
+text = "Discard x2"
 horizontal_alignment = 1
 vertical_alignment = 1

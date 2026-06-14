@@ -40,6 +40,8 @@ const AIR_COLOR: Color = Color(171.0 / 255.0, 177.0 / 255.0, 188.0 / 255.0)
 const CARD_ART_CENTER: Vector2 = Vector2(55.0, 77.0)
 const CARD_ART_SIZE: Vector2 = Vector2(75.0, 80.0)
 const CARD_ART_SCALE: float = 1.4
+const HOLOGRAPHIC_SHADER: Shader = preload("res://scenes/card/holographic.gdshader")
+const HOLOGRAPHIC_CARD_VALUES: Array[int] = [1, 11, 12, 13]
 
 var id: String:
 	get:
@@ -61,9 +63,11 @@ var _base_face_position: Vector2 = Vector2.ZERO
 var _base_back_position: Vector2 = Vector2.ZERO
 var _hover_tween: Tween
 var _shake_tween: Tween
+var _holographic_overlay: Panel
 
 
 func _ready() -> void:
+	_create_holographic_overlay()
 	_base_shadow_position = shadow.position
 	_base_face_position = face.position
 	_base_back_position = back.position
@@ -171,6 +175,7 @@ func tween_discard_to(
 	target_modulate.a = 0.0
 	var edge_scale := Vector2(FLIP_EDGE_SCALE_X, 1.0)
 
+	AudioManager.play_card_taken()
 	var move_tween := create_tween()
 	move_tween.set_trans(Tween.TRANS_CUBIC)
 	move_tween.set_ease(Tween.EASE_IN_OUT)
@@ -225,6 +230,7 @@ func tween_draw_to(
 
 	prepare_draw_from_pile(target_z_index)
 
+	AudioManager.play_card_taken()
 	var move_tween := create_tween()
 	move_tween.set_trans(Tween.TRANS_CUBIC)
 	move_tween.set_ease(Tween.EASE_IN_OUT)
@@ -259,6 +265,7 @@ func _refresh_art() -> void:
 	_refresh_value_size()
 	_refresh_predator_gradient()
 	_refresh_suit_color()
+	_refresh_holographic_overlay()
 
 
 func _get_asset_path() -> String:
@@ -312,6 +319,42 @@ func _refresh_predator_gradient() -> void:
 	predator_gradient.visible = kind == KIND_PREDATOR
 	if predator_gradient.visible:
 		predator_gradient.queue_redraw()
+
+
+func _refresh_holographic_overlay() -> void:
+	if not _holographic_overlay:
+		return
+
+	_holographic_overlay.visible = HOLOGRAPHIC_CARD_VALUES.has(value)
+
+
+func _create_holographic_overlay() -> void:
+	_holographic_overlay = Panel.new()
+	_holographic_overlay.name = "HolographicOverlay"
+	_holographic_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_holographic_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_holographic_overlay.offset_left = 0.0
+	_holographic_overlay.offset_top = 0.0
+	_holographic_overlay.offset_right = 0.0
+	_holographic_overlay.offset_bottom = 0.0
+	_holographic_overlay.add_theme_stylebox_override("panel", _create_holographic_style())
+	_holographic_overlay.material = _create_holographic_material()
+	color_panel.add_child(_holographic_overlay)
+
+
+func _create_holographic_style() -> StyleBoxFlat:
+	var style := color_panel.get_theme_stylebox("panel") as StyleBoxFlat
+	var holographic_style := StyleBoxFlat.new()
+	if style:
+		holographic_style = style.duplicate() as StyleBoxFlat
+	holographic_style.bg_color = Color.WHITE
+	return holographic_style
+
+
+func _create_holographic_material() -> ShaderMaterial:
+	var shader_material := ShaderMaterial.new()
+	shader_material.shader = HOLOGRAPHIC_SHADER
+	return shader_material
 
 
 func _get_suit_color() -> Color:

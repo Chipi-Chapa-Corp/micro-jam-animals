@@ -243,9 +243,8 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 	var hand_key := _get_hand_key(prey)
 	var scoring_prey := _get_scoring_cards(prey, hand_key)
 	var discarded_prey := _get_discarded_cards(prey, scoring_prey)
-	var scoring_value := _get_cards_score_value(scoring_prey)
+	var raw_scoring_value := _get_cards_score_value(scoring_prey)
 	var hand_multiplier := float(HAND_MULTIPLIERS.get(hand_key, 1.0))
-	var score_gain := float(scoring_value) * hand_multiplier
 	var predator_hand_key := _get_hand_key(predators)
 	var predator_raw_score := _get_cards_score_value(predators)
 	var predator_hand_multiplier := float(HAND_MULTIPLIERS.get(predator_hand_key, 1.0))
@@ -253,13 +252,14 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 
 	var card_steps := []
 	var suit_results := {}
-	var total_damage := 0
+	var adjusted_scoring_value := 0.0
 	var result := {
 		"hand_key": hand_key,
 		"hand_label": str(HAND_LABELS.get(hand_key, "High Card")),
 		"hand_multiplier": hand_multiplier,
-		"scoring_value": scoring_value,
-		"score_gain": score_gain,
+		"raw_scoring_value": raw_scoring_value,
+		"scoring_value": adjusted_scoring_value,
+		"score_gain": 0.0,
 		"predator_hand_key": predator_hand_key,
 		"predator_hand_label": str(HAND_LABELS.get(predator_hand_key, "High Card")),
 		"predator_hand_multiplier": predator_hand_multiplier,
@@ -272,6 +272,11 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 		"damage": 0,
 	}
 	var suit_scores := {
+		Cards.SUIT_WATER: 0.0,
+		Cards.SUIT_LAND: 0.0,
+		Cards.SUIT_AIR: 0.0,
+	}
+	var matchup_suit_scores := {
 		Cards.SUIT_WATER: 0.0,
 		Cards.SUIT_LAND: 0.0,
 		Cards.SUIT_AIR: 0.0,
@@ -293,8 +298,13 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 		var value := _get_card_score_value(card)
 		var amount := float(value)
 		var score_after := float(suit_scores[suit]) + amount
+		var matchup_multiplier := _get_prey_matchup_multiplier(suit, predators)
+		var matchup_amount := amount * matchup_multiplier
+		var matchup_score_after := float(matchup_suit_scores[suit]) + matchup_amount
 		suit_scores[suit] = score_after
+		matchup_suit_scores[suit] = matchup_score_after
 		suit_counts[suit] = int(suit_counts[suit]) + 1
+		adjusted_scoring_value += matchup_amount
 		card_steps.append(
 			{
 				"id": str(card.get("id", "")),
@@ -303,48 +313,37 @@ func get_score_result(prey: Array, predators: Array) -> Dictionary:
 				"multiplier": hand_multiplier,
 				"amount": amount,
 				"score_after": score_after,
+				"matchup_multiplier": matchup_multiplier,
+				"matchup_amount": matchup_amount,
+				"matchup_score_after": matchup_score_after,
 			}
 		)
+
+	var score_gain := adjusted_scoring_value * hand_multiplier
+	var escaped := score_gain >= predator_score
+	var total_damage := 0
+	if not escaped and predator_score > 0.0:
+		total_damage = int(ceil(((predator_score - score_gain) / predator_score) * DAMAGE_SCALE))
+		total_damage *= scoring_prey.size()
 
 	for suit in [Cards.SUIT_WATER, Cards.SUIT_LAND, Cards.SUIT_AIR]:
 		var prey_count := int(suit_counts[suit])
 		var base_prey_score := float(suit_scores[suit])
-		var predator_target_score := 0.0
-		for predator in predators:
-			if not (predator is Dictionary):
-				continue
-
-			var predator_suit := str(predator.get("suit", ""))
-			var predator_value := _get_card_score_value(predator)
-			var multiplier := _get_matchup_multiplier(suit, predator_suit)
-			var raw_amount := float(predator_value) * multiplier
-			predator_target_score += raw_amount
-
-		var prey_score := base_prey_score * hand_multiplier
-		var prey_matchup_score := prey_score
-		if predator_target_score > 0.0:
-			prey_matchup_score = prey_score * (float(predator_raw_score) / predator_target_score)
-
-		var escaped := prey_count > 0 and prey_matchup_score >= predator_score
-		var damage := 0
-		if prey_count > 0 and not escaped and predator_score > 0:
-			damage = int(
-				ceil(((predator_score - prey_matchup_score) / predator_score) * DAMAGE_SCALE)
-			)
-			damage *= prey_count
-
-		total_damage += damage
+		var prey_matchup_score := float(matchup_suit_scores[suit])
+		var prey_score := prey_matchup_score * hand_multiplier
 		suit_results[suit] = {
 			"prey_count": prey_count,
 			"base_prey_score": base_prey_score,
 			"prey_score": prey_score,
 			"prey_matchup_score": prey_matchup_score,
-			"predator_target_score": predator_target_score,
+			"predator_target_score": predator_score,
 			"predator_score": predator_score,
 			"escaped": escaped,
-			"damage": damage,
+			"damage": total_damage if prey_count > 0 else 0,
 		}
 
+	result["scoring_value"] = adjusted_scoring_value
+	result["score_gain"] = score_gain
 	result["damage"] = total_damage
 	return result
 
@@ -595,6 +594,21 @@ func _get_matchup_multiplier(prey_suit: String, predator_suit: String) -> float:
 		return MATCHUP_STRONG_MULTIPLIER
 
 	return MATCHUP_SAME_MULTIPLIER
+
+
+func _get_prey_matchup_multiplier(prey_suit: String, predators: Array) -> float:
+	var multiplier := 1.0
+	for predator in predators:
+		if not (predator is Dictionary):
+			continue
+
+		var predator_suit := str(predator.get("suit", ""))
+		if _does_suit_beat(prey_suit, predator_suit):
+			multiplier *= MATCHUP_STRONG_MULTIPLIER
+		elif _does_suit_beat(predator_suit, prey_suit):
+			multiplier *= MATCHUP_WEAK_MULTIPLIER
+
+	return multiplier
 
 
 func _does_suit_beat(first_suit: String, second_suit: String) -> bool:

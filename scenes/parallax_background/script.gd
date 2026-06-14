@@ -1,7 +1,7 @@
 extends Control
 
-@export var background_offset: Vector2 = Vector2(6.0, 3.5)
-@export var foreground_offset: Vector2 = Vector2(13.5, 8.0)
+@export var background_offset: Vector2 = Vector2(12.0, 7.0)
+@export var foreground_offset: Vector2 = Vector2(27.0, 16.0)
 @export var follow_speed: float = 4.0
 
 @onready var fill_layer: TextureRect = $Fill
@@ -10,7 +10,6 @@ extends Control
 
 var _current_cursor_offset: Vector2 = Vector2.ZERO
 var _target_cursor_offset: Vector2 = Vector2.ZERO
-
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE

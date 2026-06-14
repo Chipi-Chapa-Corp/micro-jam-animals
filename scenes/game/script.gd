@@ -39,6 +39,8 @@ const SCORE_SUIT_COLORS: Dictionary = {
 @onready var score_panel: Control = $UI/PreyDeckContainer/ScorePanel
 @onready var hand_label: Label = $UI/PreyDeckContainer/ScorePanel/HeaderPanel/Margin/Content/HandLabel
 @onready var suit_rows: VBoxContainer = $UI/PreyDeckContainer/ScorePanel/SuitRows
+@onready var score_gain_row: Control = $UI/PreyDeckContainer/ScorePanel/ScoreGainRow
+@onready var score_gain_label: Label = $UI/PreyDeckContainer/ScorePanel/ScoreGainRow/ScoreGainLabel
 @onready var water_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Water/Score
 @onready var land_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Land/Score
 @onready var air_row: Label = $UI/PreyDeckContainer/ScorePanel/SuitRows/Air/Score
@@ -52,6 +54,8 @@ var _predator_compare_scores: Dictionary = {}
 
 
 func _ready() -> void:
+	AudioManager.set_menu_volume_ducked(false)
+	AudioManager.play_game_music()
 	play_button.pressed.connect(_on_play_pressed)
 	player_hand_deck.card_move_animation_requested.connect(_on_player_hand_card_move_animation_requested)
 	prey_deck.card_move_animation_requested.connect(_on_prey_card_move_animation_requested)
@@ -86,6 +90,7 @@ func _on_quit_pressed() -> void:
 
 func _set_pause_menu_visible(should_show: bool) -> void:
 	pause_menu.visible = should_show
+	AudioManager.set_menu_volume_ducked(should_show)
 
 
 func _refresh_hud() -> void:
@@ -99,6 +104,7 @@ func _refresh_score_preview() -> void:
 	if GameState.get_player_table().is_empty():
 		score_panel.visible = false
 		_reset_score_rows(result)
+		_set_score_gain_visible(false)
 		_set_score_panel_row_count(score_panel, 0, false)
 		_refresh_predator_raw_preview()
 		score_delta_label.visible = false
@@ -127,9 +133,14 @@ func _on_play_pressed() -> void:
 	_is_round_resolving = true
 	_set_input_available(false)
 	var result := GameState.get_player_table_score_result()
+	var damage := int(result.get("damage", 0))
 	await _reveal_score_result(result)
+	if damage > 0:
+		AudioManager.play_predators_won()
+	else:
+		AudioManager.play_predators_lost()
 	GameState.change_score(int(roundf(float(result.get("score_gain", 0.0)))))
-	GameState.change_health(-int(result.get("damage", 0)))
+	GameState.change_health(-damage)
 
 	if GameState.get_health() <= 0:
 		get_tree().change_scene_to_file(GAME_OVER_SCENE)
@@ -156,22 +167,21 @@ func _reveal_score_result(result: Dictionary) -> void:
 	_refresh_prey_hand_preview(result)
 	_refresh_predator_score_preview(result)
 	_reset_score_rows(result)
+	_set_score_gain_visible(false)
 	score_delta_label.visible = false
 	await _show_score_rows()
 	await _reveal_prey_score_steps(result)
-	await _reveal_hand_multiplier_step(result)
 	await _reveal_suit_matchup_steps(result)
+	await _reveal_hand_multiplier_step(result)
 
 
 func _refresh_prey_hand_preview(result: Dictionary) -> void:
-	hand_label.text = "%s %s" % [
-		str(result.get("hand_label", "High Card")),
-		_format_score(float(result.get("scoring_value", 0.0)))
-	]
+	_set_prey_hand_score(result)
+	_set_score_gain_visible(false)
 	for suit in SUIT_ORDER:
 		_set_prey_suit_score(suit, 0.0, false)
 
-	suit_rows.visible = true
+	suit_rows.visible = false
 	suit_rows.modulate.a = 1.0
 	_set_score_panel_row_count(score_panel, 0, false)
 
@@ -222,6 +232,7 @@ func _reveal_hand_multiplier_step(result: Dictionary) -> void:
 	var suits: Dictionary = result.get("suits", {})
 	await _pulse_scoring_hand_cards(result)
 	_show_hand_multiplier_label(float(result.get("hand_multiplier", 1.0)))
+	_set_prey_hand_score(result)
 
 	for suit in SUIT_ORDER:
 		var suit_result: Dictionary = suits.get(suit, {})
@@ -230,6 +241,7 @@ func _reveal_hand_multiplier_step(result: Dictionary) -> void:
 
 		_set_prey_suit_score(suit, float(suit_result.get("prey_score", 0.0)), true)
 
+	_set_score_gain_visible(true, float(result.get("score_gain", 0.0)))
 	await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
 
 
@@ -241,28 +253,42 @@ func _reveal_suit_matchup_steps(result: Dictionary) -> void:
 			continue
 
 		await _pulse_suit_matchup_cards(result, suit)
-		_set_prey_suit_score(suit, float(suit_result.get("prey_matchup_score", 0.0)), true)
+		var base_prey_score := float(suit_result.get("base_prey_score", 0.0))
+		var prey_matchup_score := float(suit_result.get("prey_matchup_score", 0.0))
+		var matchup_amount := prey_matchup_score - base_prey_score
+		_set_prey_suit_score(suit, prey_matchup_score, true)
+		_show_score_change_label(suit, matchup_amount)
 		await get_tree().create_timer(SCORE_REVEAL_INTERVAL).timeout
+
+
+func _set_prey_hand_score(result: Dictionary) -> void:
+	hand_label.text = "%s x%s" % [
+		str(result.get("hand_label", "High Card")),
+		_format_score(float(result.get("hand_multiplier", 1.0)))
+	]
+
+
+func _set_score_gain_visible(should_show: bool, score: float = 0.0) -> void:
+	score_gain_row.visible = should_show
+	if not should_show:
+		return
+
+	score_gain_label.text = "Score +%s" % _format_score(score)
 
 
 func _refresh_predator_score_preview(result: Dictionary) -> void:
 	_set_predator_total_score(result, true)
 
 
-func _set_predator_total_score(result: Dictionary, compare_played_suits: bool) -> void:
+func _set_predator_total_score(result: Dictionary, _compare_played_suits: bool) -> void:
 	predator_score_panel.visible = true
 	predator_hand_label.text = "%s %s" % [
 		str(result.get("predator_hand_label", "High Card")),
 		_format_score(float(result.get("predator_score", 0.0)))
 	]
 
-	var suits: Dictionary = result.get("suits", {})
 	for suit in SUIT_ORDER:
-		var suit_result: Dictionary = suits.get(suit, {})
-		if compare_played_suits and int(suit_result.get("prey_count", 0)) > 0:
-			_predator_compare_scores[suit] = float(result.get("predator_score", 0.0))
-		else:
-			_predator_compare_scores.erase(suit)
+		_predator_compare_scores.erase(suit)
 
 		_refresh_suit_score_color(suit)
 
@@ -324,7 +350,8 @@ func _pulse_suit_matchup_cards(result: Dictionary, suit: String) -> void:
 
 func _set_prey_suit_score(suit: String, score: float, should_show: bool) -> void:
 	var row := _get_suit_row(suit)
-	row.visible = true
+	row.visible = should_show
+	row.get_parent().visible = should_show
 	row.text = _format_score(score)
 	if should_show:
 		_prey_suit_scores[suit] = score
@@ -367,18 +394,22 @@ func _refresh_score_delta_label(
 	score_delta_label.visible = true
 	score_delta_label.text = "%s %s%s" % [_get_suit_label(suit), sign, _format_score(delta)]
 	score_delta_label.add_theme_color_override("font_color", color)
+	AudioManager.play_change_tick()
 
 
 func _show_score_change_label(suit: String, amount: float) -> void:
 	score_delta_label.visible = true
-	score_delta_label.text = "%s +%s" % [_get_suit_label(suit), _format_score(amount)]
+	var sign := "+" if amount >= 0.0 else ""
+	score_delta_label.text = "%s %s%s" % [_get_suit_label(suit), sign, _format_score(amount)]
 	score_delta_label.add_theme_color_override("font_color", _get_suit_score_color(suit))
+	AudioManager.play_change_tick()
 
 
 func _show_hand_multiplier_label(multiplier: float) -> void:
 	score_delta_label.visible = true
 	score_delta_label.text = "x%s" % _format_score(multiplier)
 	score_delta_label.add_theme_color_override("font_color", Color.WHITE)
+	AudioManager.play_change_tick()
 
 
 func _get_suit_row(suit: String) -> Label:
@@ -525,6 +556,7 @@ func _animate_card_move(
 		moving_card, "scale", Vector2.ONE, CARD_MOVE_DURATION - CARD_MOVE_SCALE_DURATION
 	)
 
+	AudioManager.play_card_taken()
 	var tween := create_tween()
 	tween.set_trans(Tween.TRANS_CUBIC)
 	tween.set_ease(Tween.EASE_OUT)

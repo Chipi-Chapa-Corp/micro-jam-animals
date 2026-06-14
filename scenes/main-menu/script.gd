@@ -5,6 +5,11 @@ const DECK_SCENE: String = "res://scenes/deck/scene.tscn"
 const CREDITS_SCENE: String = "res://scenes/credits/scene.tscn"
 
 
+func _ready() -> void:
+	AudioManager.set_menu_volume_ducked(false)
+	AudioManager.play_menu_music()
+
+
 func _on_start_pressed() -> void:
 	_start_game()
 

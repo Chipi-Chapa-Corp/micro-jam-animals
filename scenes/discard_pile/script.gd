@@ -7,8 +7,9 @@ signal hover_changed(is_hovered: bool)
 const SLIDE_DURATION: float = 0.28
 const SLIDE_MARGIN: float = 24.0
 
-@onready var shadow: Panel = $Shadow
-@onready var face: Panel = $Face
+@onready var shadow: Control = $Shadow
+@onready var face: Control = $Face
+@onready var label: Label = $Face/Label
 
 var _base_shadow_position: Vector2 = Vector2.ZERO
 var _base_face_position: Vector2 = Vector2.ZERO
@@ -22,7 +23,9 @@ func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
 	GameState.player_discards_count_changed.connect(_on_player_discards_count_changed)
-	_set_available(GameState.get_player_discards_count() > 0, false)
+	var player_discards_count := GameState.get_player_discards_count()
+	_refresh_label(player_discards_count)
+	_set_available(player_discards_count > 0, false)
 
 
 func get_drop_global_position() -> Vector2:
@@ -58,6 +61,7 @@ func _on_mouse_exited() -> void:
 
 
 func _on_player_discards_count_changed(player_discards_count: int) -> void:
+	_refresh_label(player_discards_count)
 	_set_available(player_discards_count > 0, true)
 
 
@@ -75,6 +79,10 @@ func _set_available(is_available: bool, animate: bool) -> void:
 		target_offset = _get_offscreen_offset()
 
 	_slide_to_offset(target_offset, animate)
+
+
+func _refresh_label(player_discards_count: int) -> void:
+	label.text = "Discard x%s" % player_discards_count
 
 
 func _slide_to_offset(target_offset: Vector2, animate: bool) -> void:

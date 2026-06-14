@@ -7,10 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c27fk577jv0vj" path="res://scenes/player_hand_deck/scene.tscn" id="4_player_hand_deck"]
 [ext_resource type="PackedScene" uid="uid://d3ae0qxjs1s5t" path="res://scenes/discard_pile/scene.tscn" id="5_discard_pile"]
 [ext_resource type="PackedScene" uid="uid://tqgi6xydf838" path="res://scenes/prey_pile/scene.tscn" id="6_prey_pile"]
-[ext_resource type="Texture2D" uid="uid://bqh31rt7tj4om" path="res://assets/ui/border-top.png" id="7_border_top"]
-[ext_resource type="Texture2D" uid="uid://blfcepiudlmgs" path="res://assets/ui/border-bottom.png" id="8_border_bottom"]
-[ext_resource type="Texture2D" uid="uid://ctd2sm7q61t02" path="res://assets/ui/border-left.png" id="9_border_left"]
-[ext_resource type="Texture2D" uid="uid://ct31bnfobgoju" path="res://assets/ui/border-right.png" id="10_border_right"]
+[ext_resource type="Texture2D" uid="uid://b6dc04rxrq5vn" path="res://assets/suits.png" id="7_suits"]
 [ext_resource type="Texture2D" uid="uid://dibtet7a0arcn" path="res://assets/water.png" id="11_water"]
 [ext_resource type="Texture2D" uid="uid://cfywue7psuwcu" path="res://assets/land.png" id="12_land"]
 [ext_resource type="Texture2D" uid="uid://cjri1gw3rqywy" path="res://assets/air.png" id="13_air"]
@@ -35,6 +32,20 @@ grow_horizontal = 2
 
 [node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
 layout_mode = 2
+
+[node name="SuitsGuide" type="TextureRect" parent="UI"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -134.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 143.0
+grow_horizontal = 0
+mouse_filter = 2
+texture = ExtResource("7_suits")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ScoreDeltaLabel" type="Label" parent="UI" unique_id=100510402]
 visible = false
@@ -90,18 +101,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Three of a Kind 450"
 
-[node name="PlayButton" type="Button" parent="UI" unique_id=587725001]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -154.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 72.0
-grow_horizontal = 0
-disabled = true
-text = "Play"
-
 [node name="PreyDeckContainer" type="Control" parent="UI" unique_id=85535659]
 layout_mode = 3
 anchors_preset = 10
@@ -116,7 +115,7 @@ anchors_preset = 0
 offset_left = 12.0
 offset_top = 24.0
 offset_right = 233.28812
-offset_bottom = 135.0
+offset_bottom = 161.0
 
 [node name="HeaderPanel" type="Control" parent="UI/PreyDeckContainer/ScorePanel"]
 layout_mode = 1
@@ -217,6 +216,33 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "0"
 
+[node name="ScoreGainRow" type="Control" parent="UI/PreyDeckContainer/ScorePanel"]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+offset_left = 21.0
+offset_top = 138.0
+offset_right = 221.28812
+offset_bottom = 160.0
+
+[node name="Line" type="ColorRect" parent="UI/PreyDeckContainer/ScorePanel/ScoreGainRow"]
+layout_mode = 1
+anchors_preset = 0
+offset_top = 11.0
+offset_right = 82.0
+offset_bottom = 12.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.65)
+
+[node name="ScoreGainLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/ScoreGainRow"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 92.0
+offset_right = 200.0
+offset_bottom = 22.0
+theme_override_font_sizes/font_size = 14
+text = "Score +0"
+
 [node name="PreyDeckCenter" type="CenterContainer" parent="UI/PreyDeckContainer" unique_id=1191710009]
 layout_mode = 1
 anchors_preset = 15
@@ -233,10 +259,10 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -134.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = 178.0
+offset_left = -150.0
+offset_top = 8.0
+offset_right = -40.0
+offset_bottom = 162.0
 grow_horizontal = 0
 
 [node name="PlayerHandDeckContainer" type="CenterContainer" parent="UI" unique_id=8924126]
@@ -257,10 +283,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -134.0
-offset_top = -178.0
-offset_right = -24.0
-offset_bottom = -24.0
+offset_left = -150.0
+offset_top = -194.0
+offset_right = -40.0
+offset_bottom = -40.0
 grow_horizontal = 0
 grow_vertical = 0
 
@@ -273,60 +299,6 @@ offset_top = -96.0
 offset_right = 214.0
 offset_bottom = -24.0
 grow_vertical = 0
-
-[node name="BorderTop" type="TextureRect" parent="UI/HudPanel" unique_id=1724006905]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_left = -38.0
-offset_top = -36.0
-offset_right = 20.0
-grow_horizontal = 2
-mouse_filter = 2
-texture = ExtResource("7_border_top")
-expand_mode = 1
-
-[node name="BorderBottom" type="TextureRect" parent="UI/HudPanel" unique_id=258970460]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -38.0
-offset_right = 20.0
-offset_bottom = 18.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-texture = ExtResource("8_border_bottom")
-expand_mode = 1
-
-[node name="BorderLeft" type="TextureRect" parent="UI/HudPanel" unique_id=446894401]
-layout_mode = 1
-anchors_preset = -1
-anchor_bottom = 1.0
-offset_left = -38.0
-offset_top = -36.0
-offset_bottom = 18.0
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("9_border_left")
-expand_mode = 1
-
-[node name="BorderRight" type="TextureRect" parent="UI/HudPanel" unique_id=579345351]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -36.0
-offset_right = 20.0
-offset_bottom = 18.0
-grow_horizontal = 0
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("10_border_right")
-expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="UI/HudPanel" unique_id=2120364576]
 layout_mode = 1
@@ -353,6 +325,18 @@ text = "HP 100"
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Score 0"
+
+[node name="PlayButton" type="Button" parent="UI" unique_id=587725001]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -152.0
+offset_right = 214.0
+offset_bottom = -104.0
+grow_vertical = 0
+disabled = true
+text = "Play"
 
 [node name="CardAnimationLayer" type="Control" parent="UI" unique_id=430342872]
 layout_mode = 3

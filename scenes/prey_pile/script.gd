@@ -4,8 +4,8 @@ class_name PreyPile
 const SLIDE_DURATION: float = 0.28
 const SLIDE_MARGIN: float = 24.0
 
-@onready var shadow: Panel = $Shadow
-@onready var face: Panel = $Face
+@onready var shadow: Control = $Shadow
+@onready var face: Control = $Face
 
 var _base_shadow_position: Vector2 = Vector2.ZERO
 var _base_face_position: Vector2 = Vector2.ZERO
