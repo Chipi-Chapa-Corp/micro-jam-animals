@@ -377,13 +377,14 @@ func _on_player_cards_discarded(
 
 	prey_pile.begin_draw_animations()
 	var from_global_position := prey_pile.get_draw_global_position()
+	var target_states := _hide_player_hand_draw_targets(new_cards)
 	for index in range(new_cards.size()):
 		var card = new_cards[index]
 		if card is Dictionary:
 			if index == new_cards.size() - 1:
-				await _animate_card_draw_from_pile(card, from_global_position)
+				await _animate_card_draw_from_pile(card, from_global_position, target_states)
 			else:
-				_animate_card_draw_from_pile(card, from_global_position)
+				_animate_card_draw_from_pile(card, from_global_position, target_states)
 
 			if index < new_cards.size() - 1:
 				await get_tree().create_timer(CARD_DRAW_STAGGER_DURATION).timeout
@@ -478,16 +479,23 @@ func _animate_card_move(
 		target_card.mouse_filter = target_mouse_filter
 
 
-func _animate_card_draw_from_pile(card: Dictionary, from_global_position: Vector2) -> void:
+func _animate_card_draw_from_pile(
+	card: Dictionary, from_global_position: Vector2, target_states: Dictionary = {}
+) -> void:
 	var card_id := str(card.get("id", ""))
 	var target_card := _get_target_card(player_hand_deck, card_id)
 	var target_modulate := Color.WHITE
 	var target_mouse_filter := Control.MOUSE_FILTER_STOP
 	if target_card:
-		target_modulate = target_card.modulate
-		target_mouse_filter = target_card.mouse_filter
-		target_card.modulate.a = 0.0
-		target_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if target_states.has(card_id):
+			var target_state = target_states[card_id]
+			target_modulate = Color(target_state.get("modulate", target_card.modulate))
+			target_mouse_filter = int(target_state.get("mouse_filter", target_card.mouse_filter))
+		else:
+			target_modulate = target_card.modulate
+			target_mouse_filter = target_card.mouse_filter
+			target_card.modulate.a = 0.0
+			target_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var moving_card := CARD_SCENE.instantiate() as CardScene
 	moving_card.configure(
@@ -538,6 +546,31 @@ func _animate_card_draw_from_pile(card: Dictionary, from_global_position: Vector
 	if is_instance_valid(target_card):
 		target_card.modulate = target_modulate
 		target_card.mouse_filter = target_mouse_filter
+
+
+func _hide_player_hand_draw_targets(cards: Array) -> Dictionary:
+	var target_states := {}
+
+	for card in cards:
+		if not (card is Dictionary):
+			continue
+
+		var card_id := str(card.get("id", ""))
+		if card_id.is_empty() or target_states.has(card_id):
+			continue
+
+		var target_card := _get_target_card(player_hand_deck, card_id)
+		if not target_card:
+			continue
+
+		target_states[card_id] = {
+			"modulate": target_card.modulate,
+			"mouse_filter": target_card.mouse_filter,
+		}
+		target_card.modulate.a = 0.0
+		target_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	return target_states
 
 
 func _get_target_card(target_deck: Node, card_id: String) -> CardScene:
