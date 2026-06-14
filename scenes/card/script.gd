@@ -22,6 +22,12 @@ const LOWER_DURATION: float = 0.12
 const SHAKE_OFFSET: Vector2 = Vector2(7.0, 0.0)
 const SHAKE_DURATION: float = 0.035
 const FLIP_EDGE_SCALE_X: float = 0.18
+const FLIP_ELEVATION: Vector2 = Vector2(0.0, -12.0)
+const FLIP_SHADOW_OFFSET: Vector2 = Vector2(0.0, 15.0)
+const FLIP_SHADOW_SCALE: Vector2 = Vector2(1.08, 1.08)
+const FLIP_SHADOW_MODULATE: Color = Color(0.0, 0.0, 0.0, 0.28)
+const FLIP_LIFT_DURATION: float = 0.14
+const FLIP_LOWER_DURATION: float = 0.18
 const SUIT_WATER: String = "water"
 const SUIT_LAND: String = "land"
 const SUIT_AIR: String = "air"
@@ -51,6 +57,7 @@ var id: String:
 
 var _base_shadow_position: Vector2 = Vector2.ZERO
 var _base_face_position: Vector2 = Vector2.ZERO
+var _base_back_position: Vector2 = Vector2.ZERO
 var _hover_tween: Tween
 var _shake_tween: Tween
 
@@ -58,6 +65,7 @@ var _shake_tween: Tween
 func _ready() -> void:
 	_base_shadow_position = shadow.position
 	_base_face_position = face.position
+	_base_back_position = back.position
 	_sync_pivots()
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
@@ -129,11 +137,8 @@ func tween_discard_to(
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	pivot_offset = size * 0.5
 	z_index = target_z_index
-	face.position = _base_face_position
 	face.rotation_degrees = 0.0
-	shadow.position = _base_shadow_position
-	shadow.scale = Vector2.ONE
-	shadow.modulate = BASE_SHADOW_MODULATE
+	_reset_flip_elevation()
 	_show_front()
 
 	var target_modulate := modulate
@@ -157,6 +162,7 @@ func tween_discard_to(
 	flip_tween.tween_property(face, "scale", edge_scale, flip_duration * 0.44)
 	flip_tween.tween_callback(Callable(self, "_show_back"))
 	flip_tween.tween_property(back, "scale", Vector2.ONE, flip_duration * 0.56)
+	_tween_flip_elevation(move_duration)
 
 	return move_tween
 
@@ -171,11 +177,8 @@ func prepare_draw_from_pile(target_z_index: int) -> void:
 	pivot_offset = size * 0.5
 	z_index = target_z_index
 	rotation_degrees = 0.0
-	face.position = _base_face_position
 	face.rotation_degrees = 0.0
-	shadow.position = _base_shadow_position
-	shadow.scale = Vector2.ONE
-	shadow.modulate = BASE_SHADOW_MODULATE
+	_reset_flip_elevation()
 	modulate = Color.WHITE
 	_show_back()
 	back.scale = Vector2.ONE
@@ -210,6 +213,7 @@ func tween_draw_to(
 	flip_tween.tween_property(back, "scale", Vector2(-FLIP_EDGE_SCALE_X, 1.0), flip_duration * 0.44)
 	flip_tween.tween_callback(Callable(self, "_show_front_from_draw"))
 	flip_tween.tween_property(face, "scale", Vector2.ONE, flip_duration * 0.56)
+	_tween_flip_elevation(move_duration)
 
 	return move_tween
 
@@ -352,6 +356,46 @@ func _tween_lower() -> void:
 	_hover_tween.parallel().tween_property(shadow, "position", _base_shadow_position, LOWER_DURATION)
 	_hover_tween.parallel().tween_property(shadow, "scale", Vector2.ONE, LOWER_DURATION)
 	_hover_tween.parallel().tween_property(shadow, "modulate", BASE_SHADOW_MODULATE, LOWER_DURATION)
+
+
+func _reset_flip_elevation() -> void:
+	face.position = _base_face_position
+	back.position = _base_back_position
+	shadow.position = _base_shadow_position
+	shadow.scale = Vector2.ONE
+	shadow.modulate = BASE_SHADOW_MODULATE
+
+
+func _tween_flip_elevation(move_duration: float) -> Tween:
+	var lift_duration := minf(FLIP_LIFT_DURATION, move_duration * 0.4)
+	var lower_duration := minf(FLIP_LOWER_DURATION, move_duration * 0.45)
+	var hold_duration := maxf(move_duration - lift_duration - lower_duration, 0.0)
+
+	var elevation_tween := create_tween()
+	elevation_tween.set_trans(Tween.TRANS_SINE)
+	elevation_tween.set_ease(Tween.EASE_IN_OUT)
+	elevation_tween.tween_property(face, "position", _base_face_position + FLIP_ELEVATION, lift_duration)
+	elevation_tween.parallel().tween_property(
+		back, "position", _base_back_position + FLIP_ELEVATION, lift_duration
+	)
+	elevation_tween.parallel().tween_property(
+		shadow, "position", _base_shadow_position + FLIP_SHADOW_OFFSET, lift_duration
+	)
+	elevation_tween.parallel().tween_property(shadow, "scale", FLIP_SHADOW_SCALE, lift_duration)
+	elevation_tween.parallel().tween_property(
+		shadow, "modulate", FLIP_SHADOW_MODULATE, lift_duration
+	)
+	if hold_duration > 0.0:
+		elevation_tween.tween_interval(hold_duration)
+	elevation_tween.tween_property(face, "position", _base_face_position, lower_duration)
+	elevation_tween.parallel().tween_property(back, "position", _base_back_position, lower_duration)
+	elevation_tween.parallel().tween_property(shadow, "position", _base_shadow_position, lower_duration)
+	elevation_tween.parallel().tween_property(shadow, "scale", Vector2.ONE, lower_duration)
+	elevation_tween.parallel().tween_property(
+		shadow, "modulate", BASE_SHADOW_MODULATE, lower_duration
+	)
+
+	return elevation_tween
 
 
 func _sync_pivots() -> void:
