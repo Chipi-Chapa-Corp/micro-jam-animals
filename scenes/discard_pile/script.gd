@@ -86,6 +86,6 @@ func _set_available(is_available: bool, animate: bool) -> void:
 
 
 func _get_offscreen_offset() -> Vector2:
-	var pile_width := maxf(size.x, custom_minimum_size.x)
-	var offscreen_global_x := -pile_width - SLIDE_MARGIN
+	var viewport_width := get_viewport_rect().size.x
+	var offscreen_global_x := viewport_width + SLIDE_MARGIN
 	return Vector2(offscreen_global_x - global_position.x, 0.0)

@@ -41,10 +41,13 @@ layout_mode = 2
 
 [node name="DiscardPile" parent="UI/PreyDeckContainer" instance=ExtResource("5_discard_pile")]
 layout_mode = 1
-offset_left = 24.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -134.0
 offset_top = 24.0
-offset_right = 134.0
+offset_right = -24.0
 offset_bottom = 178.0
+grow_horizontal = 0
 
 [node name="PlayerHandDeckContainer" type="CenterContainer" parent="UI" unique_id=8924126]
 anchors_preset = 12
