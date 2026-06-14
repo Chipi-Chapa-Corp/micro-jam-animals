@@ -7,10 +7,17 @@ const CARD_SCENE: PackedScene = preload("res://scenes/card/scene.tscn")
 const CARD_KIND: String = "prey"
 const CARD_SIZE: Vector2 = Vector2(110.0, 154.0)
 const CARD_SEPARATION: float = 16.0
+const DISCARD_CARD_SEPARATION: float = -22.0
+const DISCARD_PULL_OFFSET: Vector2 = Vector2(-92.0, 0.0)
+const DISCARD_HOVER_DURATION: float = 0.16
+const DISCARD_MOVE_DURATION: float = 0.58
+const DISCARD_FLIP_DURATION: float = 0.24
 const SHIFT_DURATION: float = 0.14
 const TABLE_INDEX_META: String = "prey_deck_index"
 
 var _has_rendered_cards: bool = false
+var _is_discard_hovered: bool = false
+var _is_discard_animating: bool = false
 var _layout_tween: Tween
 
 
@@ -57,6 +64,70 @@ func get_card_by_id(card_id: String) -> CardScene:
 	return null
 
 
+func set_discard_hovered(is_hovered: bool) -> void:
+	if _is_discard_animating or _is_discard_hovered == is_hovered:
+		return
+
+	_is_discard_hovered = is_hovered
+	_layout_cards(true, _get_cards_in_table_order())
+
+
+func move_cards_to_discard(discard_global_position: Vector2) -> void:
+	if _is_discard_animating:
+		return
+
+	var cards := _get_cards_in_table_order()
+	if cards.is_empty():
+		_is_discard_hovered = false
+		return
+	if GameState.get_player_discards_count() <= 0:
+		_is_discard_hovered = false
+		_layout_cards(true, cards)
+		return
+
+	var discard_card_ids := _get_limited_table_card_ids()
+	if discard_card_ids.is_empty():
+		_is_discard_hovered = false
+		_layout_cards(true, cards)
+		return
+
+	var discard_cards := _get_cards_by_ids(discard_card_ids)
+
+	_is_discard_animating = true
+	_is_discard_hovered = true
+	_layout_cards(true, cards)
+
+	var hover_tween := _layout_tween
+	if hover_tween:
+		await hover_tween.finished
+
+	if not is_inside_tree():
+		_is_discard_hovered = false
+		_is_discard_animating = false
+		return
+
+	var move_tween: Tween
+
+	for index in range(discard_cards.size()):
+		var card := discard_cards[index] as CardScene
+		if not is_instance_valid(card):
+			continue
+
+		move_tween = card.tween_discard_to(
+			discard_global_position,
+			GameState.MAX_PLAYER_TABLE_CARDS + index,
+			DISCARD_MOVE_DURATION,
+			DISCARD_FLIP_DURATION
+		)
+
+	if move_tween:
+		await move_tween.finished
+
+	_is_discard_hovered = false
+	_is_discard_animating = false
+	GameState.discard_cards(discard_card_ids)
+
+
 func _add_card(prey_card: Dictionary, table_index: int) -> void:
 	print("PreyDeck instantiating card: ", prey_card)
 	var card := CARD_SCENE.instantiate() as CardScene
@@ -83,8 +154,17 @@ func _layout_cards(animate_shift: bool = false, moving_cards: Array = []) -> voi
 	if card_count == 0:
 		return
 
-	var cards_width := CARD_SIZE.x + ((CARD_SIZE.x + CARD_SEPARATION) * float(card_count - 1))
-	var start_x := (custom_minimum_size.x - cards_width) * 0.5
+	var card_separation := CARD_SEPARATION
+	var layout_offset := Vector2.ZERO
+	var layout_duration := SHIFT_DURATION
+	if _is_discard_hovered:
+		card_separation = DISCARD_CARD_SEPARATION
+		layout_offset = DISCARD_PULL_OFFSET
+		layout_duration = DISCARD_HOVER_DURATION
+
+	var card_step := CARD_SIZE.x + card_separation
+	var cards_width := CARD_SIZE.x + (card_step * float(card_count - 1))
+	var start_x := ((custom_minimum_size.x - cards_width) * 0.5) + layout_offset.x
 	var should_animate_shift := animate_shift and not moving_cards.is_empty()
 	var tween_started := false
 	if should_animate_shift:
@@ -95,7 +175,7 @@ func _layout_cards(animate_shift: bool = false, moving_cards: Array = []) -> voi
 	for index in range(card_count):
 		var card := cards[index] as CardScene
 		var target_position := Vector2(
-			start_x + ((CARD_SIZE.x + CARD_SEPARATION) * float(index)), 0.0
+			start_x + (card_step * float(index)), layout_offset.y
 		)
 
 		card.pivot_offset = CARD_SIZE * 0.5
@@ -103,9 +183,9 @@ func _layout_cards(animate_shift: bool = false, moving_cards: Array = []) -> voi
 
 		if should_animate_shift and moving_cards.has(card):
 			if tween_started:
-				_layout_tween.parallel().tween_property(card, "position", target_position, SHIFT_DURATION)
+				_layout_tween.parallel().tween_property(card, "position", target_position, layout_duration)
 			else:
-				_layout_tween.tween_property(card, "position", target_position, SHIFT_DURATION)
+				_layout_tween.tween_property(card, "position", target_position, layout_duration)
 				tween_started = true
 		else:
 			card.position = target_position
@@ -125,6 +205,29 @@ func _get_cards_in_table_order() -> Array:
 		if card and card.has_meta(TABLE_INDEX_META):
 			cards.append(card)
 	cards.sort_custom(_sort_cards_by_table_index)
+	return cards
+
+
+func _get_limited_table_card_ids() -> Array:
+	var card_ids := []
+	var player_table := GameState.get_player_table()
+	for card in player_table:
+		if card_ids.size() >= GameState.MAX_PLAYER_DISCARD_CARDS:
+			break
+
+		if card is Dictionary:
+			card_ids.append(str(card.get("id", "")))
+
+	return card_ids
+
+
+func _get_cards_by_ids(card_ids: Array) -> Array:
+	var cards := []
+	for card_id in card_ids:
+		var card := get_card_by_id(str(card_id))
+		if card:
+			cards.append(card)
+
 	return cards
 
 

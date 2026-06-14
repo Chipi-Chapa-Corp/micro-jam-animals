@@ -21,6 +21,7 @@ const ALIGN_DURATION: float = 0.11
 const LOWER_DURATION: float = 0.12
 const SHAKE_OFFSET: Vector2 = Vector2(7.0, 0.0)
 const SHAKE_DURATION: float = 0.035
+const FLIP_EDGE_SCALE_X: float = 0.18
 const SUIT_WATER: String = "water"
 const SUIT_LAND: String = "land"
 const SUIT_AIR: String = "air"
@@ -38,6 +39,7 @@ var id: String:
 
 @onready var shadow: Panel = $Shadow
 @onready var face: Panel = $Face
+@onready var back: Panel = $Back
 @onready var color_panel: Panel = $Face/Color
 @onready var predator_gradient: Control = $Face/PredatorGradient
 @onready var art: TextureRect = $Face/Art
@@ -114,6 +116,49 @@ func shake_feedback() -> void:
 	)
 	_shake_tween.tween_property(face, "position", face_start_position, SHAKE_DURATION)
 	_shake_tween.parallel().tween_property(shadow, "position", shadow_start_position, SHAKE_DURATION)
+
+
+func tween_discard_to(
+	target_global_position: Vector2, target_z_index: int, move_duration: float, flip_duration: float
+) -> Tween:
+	if _hover_tween:
+		_hover_tween.kill()
+	if _shake_tween:
+		_shake_tween.kill()
+
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pivot_offset = size * 0.5
+	z_index = target_z_index
+	face.position = _base_face_position
+	face.rotation_degrees = 0.0
+	shadow.position = _base_shadow_position
+	shadow.scale = Vector2.ONE
+	shadow.modulate = BASE_SHADOW_MODULATE
+	_show_front()
+
+	var target_modulate := modulate
+	target_modulate.a = 0.0
+	var edge_scale := Vector2(FLIP_EDGE_SCALE_X, 1.0)
+
+	var move_tween := create_tween()
+	move_tween.set_trans(Tween.TRANS_CUBIC)
+	move_tween.set_ease(Tween.EASE_IN_OUT)
+	move_tween.tween_property(self, "global_position", target_global_position, move_duration)
+
+	var fade_tween := create_tween()
+	fade_tween.set_trans(Tween.TRANS_SINE)
+	fade_tween.set_ease(Tween.EASE_IN)
+	fade_tween.tween_interval(move_duration * 0.55)
+	fade_tween.tween_property(self, "modulate", target_modulate, move_duration * 0.45)
+
+	var flip_tween := create_tween()
+	flip_tween.set_trans(Tween.TRANS_SINE)
+	flip_tween.set_ease(Tween.EASE_IN_OUT)
+	flip_tween.tween_property(face, "scale", edge_scale, flip_duration * 0.44)
+	flip_tween.tween_callback(Callable(self, "_show_back"))
+	flip_tween.tween_property(back, "scale", Vector2.ONE, flip_duration * 0.56)
+
+	return move_tween
 
 
 func _refresh_art() -> void:
@@ -258,9 +303,22 @@ func _tween_lower() -> void:
 
 func _sync_pivots() -> void:
 	face.pivot_offset = face.size * 0.5
+	back.pivot_offset = back.size * 0.5
 	shadow.pivot_offset = shadow.size * 0.5
 	art.pivot_offset = art.size * 0.5
 	bottom_art.pivot_offset = bottom_art.size * 0.5
+
+
+func _show_front() -> void:
+	face.visible = true
+	face.scale = Vector2.ONE
+	back.visible = false
+	back.scale = Vector2(FLIP_EDGE_SCALE_X, 1.0)
+
+
+func _show_back() -> void:
+	face.visible = false
+	back.visible = true
 
 
 func _get_pickup_tilt_degrees() -> float:

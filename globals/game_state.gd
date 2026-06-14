@@ -13,9 +13,9 @@ const DEFAULT_HEALTH: int = 100
 const DEFAULT_ROUND: int = 0
 const RANDOM_PREDATOR_HAND_COUNT: int = -1
 const DEFAULT_PLAYER_HAND_COUNT: int = 10
-const DEFAULT_PLAYER_DISCARDS_COUNT: int = 3
+const DEFAULT_PLAYER_DISCARDS_COUNT: int = 1
 const MAX_PLAYER_TABLE_CARDS: int = 5
-const MAX_PLAYER_DISCARD_CARDS: int = 3
+const MAX_PLAYER_DISCARD_CARDS: int = MAX_PLAYER_TABLE_CARDS
 const ERROR_PLAYER_TABLE_FULL: String = "player_table_full"
 
 var _score: int = DEFAULT_SCORE
@@ -173,7 +173,7 @@ func discard_cards(card_ids: Array) -> Array:
 	if _player_discards_count <= 0:
 		return []
 
-	var discarded_cards := _take_cards_from_player_hand(card_ids, MAX_PLAYER_DISCARD_CARDS)
+	var discarded_cards := _take_cards_from_player_table(card_ids, MAX_PLAYER_DISCARD_CARDS)
 	if discarded_cards.is_empty():
 		return []
 
@@ -183,7 +183,9 @@ func discard_cards(card_ids: Array) -> Array:
 	excluded_cards.append_array(discarded_cards)
 
 	var new_cards := Cards.pick_random_prey(discarded_cards.size(), excluded_cards)
-	_player_hand.append_array(new_cards)
+	var next_player_hand := get_player_hand()
+	next_player_hand.append_array(new_cards)
+	set_player_hand(next_player_hand)
 	_set_player_discards_count(_player_discards_count - 1)
 	player_cards_discarded.emit(
 		_duplicate_cards(discarded_cards), _duplicate_cards(new_cards), _player_discards_count
@@ -216,22 +218,22 @@ func _find_card_index_by_id(cards: Array, card_id: String) -> int:
 	return -1
 
 
-func _take_cards_from_player_hand(card_ids: Array, limit: int) -> Array:
-	var next_player_hand := get_player_hand()
+func _take_cards_from_player_table(card_ids: Array, limit: int) -> Array:
+	var next_player_table := get_player_table()
 	var taken_cards := []
 
 	for card_id in card_ids:
 		if taken_cards.size() >= limit:
 			break
 
-		var index := _find_card_index_by_id(next_player_hand, str(card_id))
+		var index := _find_card_index_by_id(next_player_table, str(card_id))
 		if index == -1:
 			continue
 
-		taken_cards.append(next_player_hand.pop_at(index))
+		taken_cards.append(next_player_table.pop_at(index))
 
 	if not taken_cards.is_empty():
-		set_player_hand(next_player_hand)
+		set_player_table(next_player_table)
 
 	return taken_cards
 

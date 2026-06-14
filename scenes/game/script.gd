@@ -10,13 +10,18 @@ const CARD_MOVE_LAYOUT_FRAMES: int = 3
 
 @onready var pause_menu: Control = $UI/PauseMenu
 @onready var card_animation_layer: Control = $UI/CardAnimationLayer
-@onready var prey_deck: PreyDeck = $UI/PreyDeckContainer/PreyDeck
+@onready var discard_pile: DiscardPile = $UI/PreyDeckContainer/DiscardPile
+@onready var prey_deck: PreyDeck = $UI/PreyDeckContainer/PreyDeckCenter/PreyDeck
 @onready var player_hand_deck: PlayerHandDeck = $UI/PlayerHandDeckContainer/PlayerHandDeck
+
+var _is_discard_animating: bool = false
 
 
 func _ready() -> void:
 	player_hand_deck.card_move_animation_requested.connect(_on_player_hand_card_move_animation_requested)
 	prey_deck.card_move_animation_requested.connect(_on_prey_card_move_animation_requested)
+	discard_pile.hover_changed.connect(_on_discard_pile_hover_changed)
+	discard_pile.clicked.connect(_on_discard_pile_clicked)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -50,6 +55,22 @@ func _on_prey_card_move_animation_requested(
 	card: Dictionary, from_global_position: Vector2, from_rotation_degrees: float
 ) -> void:
 	_animate_card_move(card, from_global_position, from_rotation_degrees, player_hand_deck)
+
+
+func _on_discard_pile_hover_changed(is_hovered: bool) -> void:
+	if _is_discard_animating:
+		return
+
+	prey_deck.set_discard_hovered(is_hovered)
+
+
+func _on_discard_pile_clicked() -> void:
+	if _is_discard_animating:
+		return
+
+	_is_discard_animating = true
+	await prey_deck.move_cards_to_discard(discard_pile.get_drop_global_position())
+	_is_discard_animating = false
 
 
 func _animate_card_move(
