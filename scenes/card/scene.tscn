@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://ba54nxkkse51f" path="res://scenes/card/script.gd" id="1_card"]
 [ext_resource type="Texture2D" uid="uid://cevv52brfyowq" path="res://assets/prey_air_4.png" id="2_card_art"]
 [ext_resource type="Script" uid="uid://c7oaraoegy805" path="res://scenes/card/radial_gradient.gd" id="3_radial_gradient"]
+[ext_resource type="Texture2D" path="res://assets/back.png" id="4_card_back"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shadow"]
 bg_color = Color(0, 0, 0, 1)
@@ -20,25 +21,6 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_color"]
 bg_color = Color(0.670588, 0.694118, 0.737255, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back"]
-bg_color = Color(0.18, 0.205, 0.19, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_back_color"]
-bg_color = Color(0.36, 0.41, 0.37, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.12, 0.145, 0.13, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -173,7 +155,7 @@ texture = ExtResource("2_card_art")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Back" type="Panel" parent="." unique_id=2103308832]
+[node name="Back" type="TextureRect" parent="." unique_id=2103308832]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -182,16 +164,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_back")
-
-[node name="Color" type="Panel" parent="Back" unique_id=127985866]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.023
-anchor_top = 0.016
-anchor_right = 0.977
-anchor_bottom = 0.984
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_back_color")
+texture = ExtResource("4_card_back")
+expand_mode = 1
+stretch_mode = 5

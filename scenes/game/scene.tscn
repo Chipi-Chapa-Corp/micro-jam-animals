@@ -14,9 +14,15 @@
 [ext_resource type="Texture2D" uid="uid://dibtet7a0arcn" path="res://assets/water.png" id="11_water"]
 [ext_resource type="Texture2D" uid="uid://cfywue7psuwcu" path="res://assets/land.png" id="12_land"]
 [ext_resource type="Texture2D" uid="uid://cjri1gw3rqywy" path="res://assets/air.png" id="13_air"]
+[ext_resource type="PackedScene" uid="uid://bvglhv1vlo0hs" path="res://scenes/parallax_background/scene.tscn" id="14_parallax_background"]
 
 [node name="Game" type="Node2D" unique_id=549444923]
 script = ExtResource("1_game")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="ParallaxBackground" parent="BackgroundLayer" instance=ExtResource("14_parallax_background")]
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=390258418]
 

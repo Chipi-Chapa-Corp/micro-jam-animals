@@ -47,7 +47,7 @@ var id: String:
 
 @onready var shadow: Panel = $Shadow
 @onready var face: Panel = $Face
-@onready var back: Panel = $Back
+@onready var back: TextureRect = $Back
 @onready var color_panel: Panel = $Face/Color
 @onready var predator_gradient: Control = $Face/PredatorGradient
 @onready var art: TextureRect = $Face/Art

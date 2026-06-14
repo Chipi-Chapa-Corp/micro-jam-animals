@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://dlek3ltg3oovq"]
+[gd_scene load_steps=3 format=3 uid="uid://dlek3ltg3oovq"]
 
 [ext_resource type="Script" uid="uid://dijk7baefiu7b" path="res://scenes/main-menu/script.gd" id="1_menu"]
+[ext_resource type="PackedScene" uid="uid://bvglhv1vlo0hs" path="res://scenes/parallax_background/scene.tscn" id="2_parallax_background"]
 
 [node name="MainMenu" type="Control" unique_id=1070428393]
 layout_mode = 3
@@ -11,14 +12,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Background" type="ColorRect" parent="." unique_id=1703901171]
+[node name="ParallaxBackground" parent="." instance=ExtResource("2_parallax_background")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.05, 0.07, 0.06, 1)
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=620687346]
 layout_mode = 1
