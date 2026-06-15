@@ -1,0 +1,68 @@
+[gd_scene load_steps=3 format=3 uid="uid://cbu8gk6docq08"]
+
+[ext_resource type="Script" uid="uid://dlskmycyuhq2i" path="res://scenes/hands/script.gd" id="1_hands"]
+[ext_resource type="PackedScene" uid="uid://bvglhv1vlo0hs" path="res://scenes/parallax_background/scene.tscn" id="2_parallax_background"]
+
+[node name="Hands" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hands")
+
+[node name="ParallaxBackground" parent="." instance=ExtResource("2_parallax_background")]
+layout_mode = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = -40.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="MarginContainer/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hands"
+vertical_alignment = 1
+
+[node name="Back" type="Button" parent="MarginContainer/Content/Header"]
+layout_mode = 2
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Hands" type="VBoxContainer" parent="MarginContainer/Content/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[node name="Note" type="Label" parent="MarginContainer/Content/ScrollContainer/Hands"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "No Flushes: suits show animal type and are used for prey escape matchups."
+autowrap_mode = 3
+
+[node name="HandRows" type="VBoxContainer" parent="MarginContainer/Content/ScrollContainer/Hands"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 18
+
+[connection signal="pressed" from="MarginContainer/Content/Header/Back" to="." method="_on_back_pressed"]

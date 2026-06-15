@@ -3,10 +3,13 @@ extends Control
 const GAME_SCENE: String = "res://scenes/game/scene.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/main-menu/scene.tscn"
 
+@onready var final_score: Label = $CenterContainer/Menu/FinalScore
+
 
 func _ready() -> void:
 	AudioManager.set_menu_volume_ducked(false)
 	AudioManager.play_menu_music()
+	final_score.text = "Final Score %s" % GameState.get_score()
 
 
 func _on_restart_pressed() -> void:

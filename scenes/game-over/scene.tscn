@@ -32,6 +32,11 @@ layout_mode = 2
 text = "Game Over"
 horizontal_alignment = 1
 
+[node name="FinalScore" type="Label" parent="CenterContainer/Menu"]
+layout_mode = 2
+text = "Final Score 0"
+horizontal_alignment = 1
+
 [node name="Restart" type="Button" parent="CenterContainer/Menu" unique_id=492775660]
 layout_mode = 2
 text = "Restart"

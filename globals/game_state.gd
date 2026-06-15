@@ -25,7 +25,7 @@ const HAND_TWO_PAIR: String = "two_pair"
 const HAND_THREE_OF_A_KIND: String = "three_of_a_kind"
 const HAND_STRAIGHT: String = "straight"
 const HAND_FULL_HOUSE: String = "full_house"
-const DAMAGE_SCALE: float = 12.0
+const DAMAGE_SCALE: float = 20.0
 const MATCHUP_WEAK_MULTIPLIER: float = 0.75
 const MATCHUP_SAME_MULTIPLIER: float = 1.0
 const MATCHUP_STRONG_MULTIPLIER: float = 1.25
@@ -53,6 +53,8 @@ var _predators: Array = []
 var _player_hand: Array = []
 var _player_table: Array = []
 var _player_discards_count: int = DEFAULT_PLAYER_DISCARDS_COUNT
+var _is_tutorial_active: bool = false
+var _is_game_active: bool = false
 
 
 func reset() -> void:
@@ -93,6 +95,22 @@ func change_score(amount: int) -> void:
 	set_score(_score + amount)
 
 
+func set_game_active(is_active: bool) -> void:
+	_is_game_active = is_active
+
+
+func is_game_active() -> bool:
+	return _is_game_active
+
+
+func set_tutorial_active(is_active: bool) -> void:
+	_is_tutorial_active = is_active
+
+
+func is_tutorial_active() -> bool:
+	return _is_tutorial_active
+
+
 func get_health() -> int:
 	return _health
 
@@ -115,6 +133,11 @@ func get_round() -> int:
 
 func get_predators() -> Array:
 	return _predators.duplicate()
+
+
+func set_predators(value: Array) -> void:
+	_predators = _duplicate_cards(value)
+	predators_changed.emit(get_predators())
 
 
 func generate_predators(count: int = RANDOM_PREDATOR_HAND_COUNT, excluded: Array = []) -> Array:

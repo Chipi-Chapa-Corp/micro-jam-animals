@@ -29,26 +29,21 @@ theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="CenterContainer/Menu" unique_id=443282082]
 layout_mode = 2
-text = "Micro Jam Animals"
+text = "Prey Holdem | Micro Jam 'Animals'"
 horizontal_alignment = 1
+
+[node name="Tutorial" type="Button" parent="CenterContainer/Menu"]
+layout_mode = 2
+text = "TUTORIAL"
 
 [node name="Start" type="Button" parent="CenterContainer/Menu" unique_id=1693712939]
 layout_mode = 2
-text = "Start"
+text = "START"
 
 [node name="Deck" type="Button" parent="CenterContainer/Menu" unique_id=774290378]
 layout_mode = 2
-text = "Deck"
+text = "DECK"
 
-[node name="Credits" type="Button" parent="CenterContainer/Menu" unique_id=1783422860]
-layout_mode = 2
-text = "Credits"
-
-[node name="Quit" type="Button" parent="CenterContainer/Menu" unique_id=33081914]
-layout_mode = 2
-text = "Quit"
-
+[connection signal="pressed" from="CenterContainer/Menu/Tutorial" to="." method="_on_tutorial_pressed"]
 [connection signal="pressed" from="CenterContainer/Menu/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="CenterContainer/Menu/Deck" to="." method="_on_deck_pressed"]
-[connection signal="pressed" from="CenterContainer/Menu/Credits" to="." method="_on_credits_pressed"]
-[connection signal="pressed" from="CenterContainer/Menu/Quit" to="." method="_on_quit_pressed"]

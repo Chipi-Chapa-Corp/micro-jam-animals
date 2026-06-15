@@ -16,10 +16,10 @@
 [node name="Game" type="Node2D" unique_id=549444923]
 script = ExtResource("1_game")
 
-[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+[node name="BackgroundLayer" type="CanvasLayer" parent="." unique_id=1723850164]
 layer = -1
 
-[node name="ParallaxBackground" parent="BackgroundLayer" instance=ExtResource("14_parallax_background")]
+[node name="ParallaxBackground" parent="BackgroundLayer" unique_id=1815975966 instance=ExtResource("14_parallax_background")]
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=390258418]
 
@@ -33,7 +33,7 @@ grow_horizontal = 2
 [node name="PredatorDeck" parent="UI/PredatorDeckContainer" unique_id=1434294166 instance=ExtResource("2_tepwh")]
 layout_mode = 2
 
-[node name="SuitsGuide" type="TextureRect" parent="UI"]
+[node name="SuitsGuide" type="TextureRect" parent="UI" unique_id=1432585296]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -46,6 +46,23 @@ mouse_filter = 2
 texture = ExtResource("7_suits")
 expand_mode = 1
 stretch_mode = 5
+
+[node name="MultiplierLabel" type="Label" parent="UI/SuitsGuide" unique_id=12128825]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13, 0.11, 0.09, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "±0.25x"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ScoreDeltaLabel" type="Label" parent="UI" unique_id=100510402]
 visible = false
@@ -117,13 +134,13 @@ offset_top = 24.0
 offset_right = 233.28812
 offset_bottom = 161.0
 
-[node name="HeaderPanel" type="Control" parent="UI/PreyDeckContainer/ScorePanel"]
+[node name="HeaderPanel" type="Control" parent="UI/PreyDeckContainer/ScorePanel" unique_id=836146929]
 layout_mode = 1
 anchors_preset = 0
 offset_right = 221.28812
 offset_bottom = 51.0
 
-[node name="Background" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel"]
+[node name="Background" type="TextureRect" parent="UI/PreyDeckContainer/ScorePanel/HeaderPanel" unique_id=690959072]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -158,7 +175,6 @@ text = "Select prey"
 
 [node name="SuitRows" type="VBoxContainer" parent="UI/PreyDeckContainer/ScorePanel" unique_id=1970974981]
 layout_mode = 1
-anchors_preset = 0
 offset_left = 21.0
 offset_top = 57.0
 offset_right = 221.28812
@@ -216,22 +232,22 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "0"
 
-[node name="ScoreGainRow" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows"]
+[node name="ScoreGainRow" type="HBoxContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows" unique_id=1876693710]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="LineCenter" type="CenterContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow"]
+[node name="LineCenter" type="CenterContainer" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow" unique_id=160495924]
 custom_minimum_size = Vector2(82, 0)
 layout_mode = 2
 
-[node name="Line" type="ColorRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow/LineCenter"]
+[node name="Line" type="ColorRect" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow/LineCenter" unique_id=875696489]
 custom_minimum_size = Vector2(82, 1)
 layout_mode = 2
 mouse_filter = 2
 color = Color(1, 1, 1, 0.65)
 
-[node name="ScoreGainLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow"]
+[node name="ScoreGainLabel" type="Label" parent="UI/PreyDeckContainer/ScorePanel/SuitRows/ScoreGainRow" unique_id=298840814]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Score +0"
@@ -329,7 +345,7 @@ offset_right = 214.0
 offset_bottom = -104.0
 grow_vertical = 0
 disabled = true
-text = "Play"
+text = "Play Hand"
 
 [node name="CardAnimationLayer" type="Control" parent="UI" unique_id=430342872]
 layout_mode = 3
@@ -378,16 +394,21 @@ horizontal_alignment = 1
 
 [node name="Resume" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=2077523352]
 layout_mode = 2
-text = "Resume"
+text = "Continue"
+
+[node name="Combinations" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=748612969]
+layout_mode = 2
+text = "Combinations"
+
+[node name="Restart" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=1600172826]
+layout_mode = 2
+text = "Restart"
 
 [node name="MainMenu" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=1977902567]
 layout_mode = 2
 text = "Main Menu"
 
-[node name="Quit" type="Button" parent="UI/PauseMenu/CenterContainer/Menu" unique_id=1480331665]
-layout_mode = 2
-text = "Quit"
-
 [connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Combinations" to="." method="_on_combinations_pressed"]
+[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Restart" to="." method="_on_restart_pressed"]
 [connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/MainMenu" to="." method="_on_main_menu_pressed"]
-[connection signal="pressed" from="UI/PauseMenu/CenterContainer/Menu/Quit" to="." method="_on_quit_pressed"]
