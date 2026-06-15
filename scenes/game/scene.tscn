@@ -328,7 +328,7 @@ theme_override_constants/separation = 6
 [node name="HealthLabel" type="Label" parent="UI/HudPanel/Margin/Content" unique_id=253577740]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "HP 100"
+text = "HP 50"
 
 [node name="ScoreLabel" type="Label" parent="UI/HudPanel/Margin/Content" unique_id=548351494]
 layout_mode = 2

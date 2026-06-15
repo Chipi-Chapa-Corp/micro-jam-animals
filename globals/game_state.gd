@@ -10,7 +10,7 @@ signal player_cards_discarded(discarded_cards: Array, new_cards: Array, player_d
 signal player_discards_count_changed(player_discards_count: int)
 
 const DEFAULT_SCORE: int = 0
-const DEFAULT_HEALTH: int = 100
+const DEFAULT_HEALTH: int = 50
 const DEFAULT_ROUND: int = 0
 const RANDOM_PREDATOR_HAND_COUNT: int = -1
 const DEFAULT_PLAYER_HAND_COUNT: int = 8
